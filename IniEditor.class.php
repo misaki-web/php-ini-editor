@@ -163,8 +163,10 @@ class IniEditor
 			<script src="https://code.jquery.com/jquery-3.1.1.min.js"
 			        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
 			        crossorigin="anonymous"></script>
-			<link rel="stylesheet" type="text/css" media="screen"
-			      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
+			<link rel="stylesheet"
+			      type="text/css"
+			      media="screen"
+			      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 			HEREDOC;
 	}
 	
@@ -229,8 +231,14 @@ class IniEditor
 				label.array_key {
 					margin-top: 10px;
 				}
-				.form-group span:nth-child(1) .col-md-10 label.array_key {
+				.form-group div:nth-child(1) .col-md-10 label.array_key {
 					margin-top: 0px;
+				}
+				.center {
+					text-align: center;
+				}
+				.width_100 {
+					width: 100%;
 				}
 			</style>
 			HEREDOC;
@@ -255,7 +263,7 @@ class IniEditor
 					}
 				</style>
 				
-				<script type="text/javascript">
+				<script>
 					function addRow(obj, type, isarray) {
 						var name = prompt('Which is the name of the new config field?');
 						
@@ -274,7 +282,7 @@ class IniEditor
 								           '</div>' +
 								           '<div class="col-md-8">' +
 								             '<div class="form-group vector">' +
-								               '<span>' +
+								               '<div>' +
 								                 '<input class="form-control" type="checkbox" ' +
 								                         'name="ini#' + section + '#' + name + '#' + type + '[]" /> ' +
 								                 '<a href="javascript:;" ' +
@@ -292,7 +300,7 @@ class IniEditor
 								                   ' <a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">X</a>' :
 								                   ''
 								                 ) .
-								                 '</span></div>';
+								                 '</div></div>';
 							} else {
 								var namekey = prompt('Which is the key of the first value (leave blank for none)?');
 								var html =   '<label class="col-form-label">' +
@@ -302,7 +310,7 @@ class IniEditor
 								           '</div>' +
 								           '<div class="col-md-8">' +
 								             '<div class="form-group vector">' +
-								               '<span>' +
+								               '<div>' +
 								                 '<div class="col-md-10">' +
 								                   '<label class="array_key">' +
 								                     namekey +
@@ -329,14 +337,14 @@ class IniEditor
 								                     ''
 								                   ) .
 								                 '</div>' +
-								               '</span>' +
+								               '</div>' +
 								             '</div>';
 							}
 							
-							html +=   '<table width="100%" class="array_add_value">' +
+							html +=   '<table class="array_add_value width_100">' +
 							            '<tbody>' +
 							              '<tr>' +
-							                '<td align="center">' +
+							                '<td class="center">' +
 							                  '<a href="javascript:;" ' +
 							                      'class="btn btn-info" ' +
 							                      'onclick="javascript:addArrayRow(this, \'text\');">' +
@@ -401,7 +409,7 @@ class IniEditor
 						var namekey = prompt('Which is the key of the value to add (leave blank for none)?');
 						var section = $(obj).parents('fieldset').find('legend span:last').text();
 						
-						var html = '<span>' +
+						var html = '<div>' +
 						             '<div class="col-md-10">' +
 						               '<label class="array_key">' +
 						                 namekey +
@@ -464,8 +472,8 @@ class IniEditor
 						                 section +
 						               '</span>' +
 						             '</legend>' +
-						             '<span class="config-container">' +
-						             '</span>' +
+						             '<div class="config-container">' +
+						             '</div>' +
 						           '</fieldset>';
 						
 						$(obj).parents('.editor-container').find('form').prepend(html);
@@ -528,7 +536,6 @@ class IniEditor
 		
 		$conf = parse_ini_file($this->ini_file, true, $this->scanner_mode);
 		
-		$html .= $this->getScripts();
 		$html .= <<<HEREDOC
 			<form method="post">
 				<input type="hidden" name="save_ini_form" value="1" />
@@ -563,7 +570,7 @@ class IniEditor
 			
 			$html .= '<span onclick="$(this).parent().next().slideToggle();">' . "$c</span>";
 			$html .= "</legend>\n";
-			$html .= '<span class="config-container container">' . "\n";
+			$html .= '<div class="config-container container">' . "\n";
 			
 			foreach ($cv as $label => $val) {
 				$html .= '<div class="form-group row">';
@@ -625,7 +632,7 @@ class IniEditor
 					$html .= '<div class="form-group vector">';
 					
 					foreach ($val as $k => $v) {
-						$html .= "<span>";
+						$html .= "<div>";
 						$html .= '<div class="col-md-10">';
 						
 						if (!is_numeric($k)) {
@@ -659,16 +666,16 @@ class IniEditor
 						}
 						
 						$html .= "</div>";
-						$html .= "</span>";
+						$html .= "</div>";
 					}
 					
 					$html .= "</div>";
 					
 					if ($this->enable_add && $this->enable_edit) {
 						$html .= <<<'HEREDOC'
-							<table width="100%" class="array_add_value">
+							<table class="array_add_value width_100">
 								<tr>
-									<td align="center">
+									<td class="center">
 										<a href="javascript:;" class="btn btn-info" onclick="javascript:addArrayRow(this, 'text');">Add value</a>
 									</td>
 								</tr>
@@ -682,7 +689,7 @@ class IniEditor
 				$html .= "</div>\n";
 			}
 			
-			$html .= "</span>";
+			$html .= "</div>";
 			$html .= "</fieldset>\n";
 		}
 		
