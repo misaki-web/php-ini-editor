@@ -30,7 +30,7 @@
 		<?php
 
 		// include the class
-		include('IniEditor.class.php');
+		include('../IniEditor.class.php');
 
 		// initialize the class object
 		$ini_editor = new IniEditor();
@@ -48,7 +48,7 @@
 		$ini_editor->setScannerMode(INI_SCANNER_RAW);
 		
 		// set the path of the file you want to edit or view
-		$ini_editor->setIniFile('default.ini');
+		$ini_editor->setIniFile('demo.ini');
 		
 		// set to true to allow edit of the config file (default is true)
 		$ini_editor->enableEdit(true);
