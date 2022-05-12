@@ -605,7 +605,9 @@ class IniEditor
 						$html .= "<input class='form-control' type='checkbox' name='ini#$c#$label#bool' value='1'" .
 						         ($val ? ' checked="checked"' : "") . " />";
 					} else {
-						$html .= "<textarea rows='1' class='form-control' name='ini#$c#$label#text'>$val</textarea>";
+						$html .= "<textarea rows='1' class='form-control' name='ini#$c#$label#text'>" .
+						         str_replace('\\"', '"', $val) .
+						         "</textarea>";
 					}
 					
 					$html .= "</div>";
@@ -644,7 +646,9 @@ class IniEditor
 							$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c#$label#bool[]' value='1'" .
 							         ($v ? ' checked="checked"' : "") . " />";
 						} else {
-							$html .= "<textarea rows='1' class='form-control' name='ini#$c#$label#text[$k]'>$v</textarea>";
+							$html .= "<textarea rows='1' class='form-control' name='ini#$c#$label#text[$k]'>" .
+							         str_replace('\\"', '"', $v) .
+							         "</textarea>";
 						}
 						
 						$html .= "</div>";
