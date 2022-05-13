@@ -324,6 +324,40 @@ class IniEditor
 				.filename {
 					font-family: monospace;
 				}
+				
+				@media only screen and (max-width: 600px) {
+					.editor-container {
+						margin: 5px;
+						padding: 5px;
+					}
+					
+					.config-container {
+						width: 100%;
+						margin-left: 0;
+					}
+					
+					.col-md-2 {
+						margin-left: 5px;
+					}
+					
+					.col-md-4 {
+						width: auto;
+					}
+					
+					.col-md-4,
+					.col-md-8 {
+						padding-left: 0;
+						padding-right: 0;
+					}
+					
+					.col-md-10 {
+						width: 100%;
+					}
+					
+					textarea.form-control {
+						width: 100%;
+					}
+				}
 			</style>
 			HEREDOC;
 	}
