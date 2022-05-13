@@ -147,12 +147,12 @@ class IniEditor
 			$res = file_put_contents($_REQUEST["ini_file"], $content);
 			
 			if ($res) {
-				echo '<div class="alert alert-success">' . $_REQUEST["ini_file"] . " saved</div>";
+				echo '<div class="alert alert-success"><span class="filename">' . $_REQUEST["ini_file"] . "</span> saved</div>";
 			} else {
-				echo '<div class="alert alert-error">' . $_REQUEST["ini_file"] . " cannot be saved</div>";
+				echo '<div class="alert alert-error"><span class="filename">' . $_REQUEST["ini_file"] . "</span> cannot be saved</div>";
 			}
 		} else {
-			echo '<div class="alert alert-error">Check wrte permissions on ' . $this->backup_folder . "</div>";
+			echo '<div class="alert alert-error">Check write permissions on ' . $this->backup_folder . "</div>";
 		}
 	}
 	
@@ -178,42 +178,91 @@ class IniEditor
 				[onclick] {
 					cursor:pointer;
 				}
+				.editor-container,
+				.alert {
+					max-width: 1250px;
+					margin-left: auto;
+					margin-right: auto;
+				}
+				.alert {
+					margin-top: 5px;
+				}
 				.editor-container {
-					max-width: 90%;
-					margin: auto;
+					margin-top: 20px;
+					margin-bottom: 20px;
 					border: 1px solid #D9D9D9;
-					padding: 10px;
+					border-radius: 4px;
+					padding: 20px;
 				}
-				.btn{
-					font-size: 10px;
+				.btn,
+				.btn:hover,
+				.btn:active,
+				.btn:focus {
+					font-size: 0.9rem;
 					padding: 3px;
+					background-color: #0b5ed7;
+					border: none;
+					border-radius: 4px;
+					color: #ffffff;
 				}
-				.h3-label{
-					font-size: 80%;
-					font-weight: normal;
-					margin-right: 20px;
+				.btn:hover,
+				.btn:active,
+				.btn:focus {
+					background-color: #0c69f0;
 				}
-				.config-container{
-					width: 80%;
+				.editor-container h3 {
+					border-bottom: 1px solid #d9d9d9;
+					margin-bottom: 20px;
+				}
+				.config-container {
+					width: calc(100% - 50px);
 					margin-left: 50px;
 					display: block;
 				}
+				legend {
+					margin-bottom: 10px;
+				}
 				textarea.form-control {
-					width: 100%;
+					width: calc(100% - 70px);
 					display: inline-block;
+					padding: 10px 7px 0px 7px;
+				}
+				.col-md-10 textarea.form-control {
+					width: 100%;
 				}
 				.form-group.vector {
 					display: inline-block;
 					width: 100%;
 					vertical-align: top;
 				}
+				.form-group.vector > div {
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					margin-bottom: 10px;
+				}
+				.config-container > div.form-group.row:last-child .col-md-8,
+				.config-container > div.form-group.row:last-child .col-md-8 .array_add_value {
+					margin-bottom: 0;
+				}
 				.editor-container fieldset {
-					margin-top: 15px;
-					margin-bottom: 15px;
+					margin-top: 20px;
+					margin-bottom: 20px;
+					padding: 10px;
+					background-color: #f2f2f2;
+					border-radius: 4px;
+				}
+				.section {
+					display: block;
 				}
 				input.btn.btn-success {
-					font-size: 16px;
+					font-size: 1.2rem;
 					padding: 10px;
+					margin-left: auto;
+					margin-right: auto;
+					display: block;
+					min-width: 150px;
+					font-weight: bold;
 				}
 				input.form-control[type="checkbox"] {
 					height: 20px;
@@ -223,10 +272,16 @@ class IniEditor
 					vertical-align: middle;
 				}
 				.remove-btn {
-					margin-right: 15px;
+					margin-right: 0;
 				}
 				.down-arr, .up-arr {
 					margin-right: 5px;
+				}
+				.config-container > div.form-group.row:first-child .col-md-8 .with-array-key {
+					margin-top: 10px;
+				}
+				.with-array-key .col-md-2 {
+					margin-top: 20px;
 				}
 				label.array_key {
 					margin-top: 10px;
@@ -234,11 +289,40 @@ class IniEditor
 				.form-group div:nth-child(1) .col-md-10 label.array_key {
 					margin-top: 0px;
 				}
+				.col-form-label {
+					height: 32px;
+				}
+				.col-form-label span {
+					height: 32px;
+					line-height: 32px;
+				}
+				.col-form-label.is-array span::after {
+					content: "[]";
+				}
+				.col-md-2 {
+					width: 60px;
+					margin-bottom: 0;
+					margin-left: 10px;
+				}
+				.col-md-4 {
+					width: 25%;
+				}
+				.col-md-8 {
+					width: 75%;
+					margin-bottom: 10px;
+				}
+				.col-md-10 {
+					flex: 1 0 auto;
+					width: auto;
+				}
+				.array_add_value {
+					margin-bottom: 15px;
+				}
 				.center {
 					text-align: center;
 				}
-				.width_100 {
-					width: 100%;
+				.filename {
+					font-family: monospace;
 				}
 			</style>
 			HEREDOC;
@@ -256,6 +340,7 @@ class IniEditor
 						display: inline;
 						background: #D9D9D9;
 						border: 3px dotted #888;
+						border-radius: 4px;
 						margin-right: 5px;
 					}
 					input.move-input:focus {
@@ -271,13 +356,15 @@ class IniEditor
 							return;
 						}
 						
-						var section = $(obj).parents('fieldset').find('legend').find('span:last').text();
+						var section = $(obj).parents('fieldset').find('legend').find('span.section').text();
 						
 						if (isarray == 'array') {
 							if (type == 'bool') {
-								var html =   '<label class="col-form-label">' +
+								var html =   '<label class="col-form-label is-array">' +
 								               '<input type="text" class="move-input" size="1" />' +
-								               name +
+								               '<span>' +
+								                 name +
+								               '</span>' +
 								             '</label>' +
 								           '</div>' +
 								           '<div class="col-md-8">' +
@@ -289,28 +376,30 @@ class IniEditor
 								                     'onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())" ' +
 								                     'class="down-arr">' +
 								                   '&#8595;' +
-								                 '</a> ' +
+								                 '</a>' +
 								                 '<a href="javascript:;" ' +
 								                     'onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())" ' +
 								                     'class="up-arr">' +
 								                   '&#8593;' +
-								                 '</a>" .
+								                 '</a>' +
 								                 (
 								                   $this->enable_delete ?
-								                   ' <a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">X</a>' :
+								                   '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>' :
 								                   ''
-								                 ) .
+								                 ) +
 								                 '</div></div>';
 							} else {
 								var namekey = prompt('Which is the key of the first value (leave blank for none)?');
-								var html =   '<label class="col-form-label">' +
+								var html =   '<label class="col-form-label is-array">' +
 								               '<input type="text" class="move-input" size="1" />' +
-								               name +
+								               '<span>' +
+								                 name +
+								               '</span>' +
 								             '</label>' +
 								           '</div>' +
 								           '<div class="col-md-8">' +
 								             '<div class="form-group vector">' +
-								               '<div>' +
+								               '<div class="with-array-key">' +
 								                 '<div class="col-md-10">' +
 								                   '<label class="array_key">' +
 								                     namekey +
@@ -325,23 +414,23 @@ class IniEditor
 								                       'onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())" ' +
 								                       'class="down-arr">' +
 								                     '&#8595;' +
-								                   '</a> ' +
+								                   '</a>' +
 								                   '<a href="javascript:;" ' +
 								                       'onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())" ' +
 								                       'class="up-arr">' +
 								                     '&#8593;' +
-								                   '</a>' .
+								                   '</a>' +
 								                   (
 								                     $this->enable_delete ?
-								                     ' <a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">X</a>' :
+								                     '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>' :
 								                     ''
-								                   ) .
+								                   ) +
 								                 '</div>' +
 								               '</div>' +
 								             '</div>';
 							}
 							
-							html +=   '<table class="array_add_value width_100">' +
+							html +=   '<table class="array_add_value">' +
 							            '<tbody>' +
 							              '<tr>' +
 							                '<td class="center">' +
@@ -359,7 +448,9 @@ class IniEditor
 							if (type == 'bool') {
 								var html =   '<label class="col-form-label">' +
 								               '<input type="text" class="move-input" size="1" />' +
-								               name +
+								               '<span>' +
+								                 name +
+								               '</span>' +
 								             '</label>' +
 								           '</div>' +
 								           '<div class="col-md-8">' +
@@ -368,7 +459,9 @@ class IniEditor
 							} else {
 								var html =   '<label class="col-form-label">' +
 								               '<input type="text" class="move-input" size="1" />' +
-								               name +
+								               '<span>' +
+								                 name +
+								               '</span>' +
 								             '</label>' +
 								           '</div>' +
 								           '<div class="col-md-8">' +
@@ -383,18 +476,18 @@ class IniEditor
 						             'onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())" ' +
 						             'class="down-arr">' +
 						           '&darr;' +
-						         '</a> ' +
+						         '</a>' +
 						         '<a href="javascript:;" ' +
 						             'onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())" ' +
 						             'class="up-arr">' +
 						           '&uarr;' +
-						         '</a>' .
+						         '</a>' +
 						         (
 						           $this->enable_delete ?
-						           ' <a href="javascript:;" class="remove-btn" onclick="$(this).parents(\'.form-group\').remove();">X</a>' :
+						           '<a href="javascript:;" class="remove-btn" onclick="$(this).parents(\'.form-group\').remove();">×</a>' :
 						           ''
-						         ) .
-						         + html;
+						         ) +
+						         html;
 						
 						html = '<div class="form-group row">' + html + '</div>';
 						
@@ -407,9 +500,9 @@ class IniEditor
 					function addArrayRow(obj, type) {
 						var name = $(obj).parents('.form-group').find('.col-form-label').text();
 						var namekey = prompt('Which is the key of the value to add (leave blank for none)?');
-						var section = $(obj).parents('fieldset').find('legend span:last').text();
+						var section = $(obj).parents('fieldset').find('legend span.section').text();
 						
-						var html = '<div>' +
+						var html = '<div class="with-array-key">' +
 						             '<div class="col-md-10">' +
 						               '<label class="array_key">' +
 						                 namekey +
@@ -423,17 +516,17 @@ class IniEditor
 						              'onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())" ' +
 						              'class="down-arr">' +
 						            '&darr;' +
-						          '</a> ' +
+						          '</a>' +
 						          '<a href="javascript:;" ' +
 						              'onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())" ' +
 						              'class="up-arr">' +
 						            '&uarr;' +
-						          '</a>' .
+						          '</a>' +
 						          (
 						            $this->enable_delete ?
-						            ' <a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">X</a>' :
+						            '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>' :
 						            ''
-						          ) .
+						          ) +
 						        '</div>';
 						
 						$(obj).parents('.col-md-8').find('.form-group:first').append(html);
@@ -451,6 +544,9 @@ class IniEditor
 						
 						var html = '<fieldset>' +
 						             '<legend>' +
+						               '<span class="section" onclick="$(this).parent().parent().next().slideToggle();">' +
+						                 section +
+						               '</span>' +
 						               '<span>' +
 						                 '<a href="javascript:;" ' +
 						                     'class="btn btn-info" ' +
@@ -468,9 +564,6 @@ class IniEditor
 						                   'Add Array config' +
 						                 '</a>' +
 						               '</span> ' +
-						               '<span onclick="$(this).parent().parent().next().slideToggle();">' +
-						                 section +
-						               '</span>' +
 						             '</legend>' +
 						             '<div class="config-container">' +
 						             '</div>' +
@@ -522,7 +615,7 @@ class IniEditor
 			$html .= $this->saveForm();
 		}
 		
-		$html .= '<h3><span class="h3-label">Selected file:</span>' . $this->ini_file . "</h3>";
+		$html .= '<h3><span class="h3-label">Selected file:</span> <span class="filename">' . $this->ini_file . "</span></h3>";
 		
 		if ($this->enable_add && $this->enable_edit) {
 			$html .= '<span><a href="javascript:;" class="btn btn-primary" onclick="addSection(this);">Add section</a></span>';
@@ -552,6 +645,7 @@ class IniEditor
 		
 		foreach ($conf as $c => $cv) {
 			$html .= "<fieldset><legend>\n";
+			$html .= '<span class="section" onclick="$(this).parent().next().slideToggle();">' . "$c</span>";
 			
 			if ($this->enable_add && $this->enable_edit) {
 				$html .= <<<'HEREDOC'
@@ -568,7 +662,6 @@ class IniEditor
 					HEREDOC;
 			}
 			
-			$html .= '<span onclick="$(this).parent().next().slideToggle();">' . "$c</span>";
 			$html .= "</legend>\n";
 			$html .= '<div class="config-container container">' . "\n";
 			
@@ -588,11 +681,11 @@ class IniEditor
 							HEREDOC;
 						
 						if ($this->enable_delete) {
-							$html .= ' <a href="javascript:;" class="remove-btn" onclick="$(this).parents(\'.form-group\').remove();">X</a> ';
+							$html .= '<a href="javascript:;" class="remove-btn" onclick="$(this).parents(\'.form-group\').remove();">×</a>';
 						}
 					}
 					
-					$html .= ' <label class="col-form-label"><input type="text" class="move-input" size="1"/>' . "$label</label>";
+					$html .= ' <label class="col-form-label"><input type="text" class="move-input" size="1"/><span>' . "$label</span></label>";
 					$html .= "</div>";
 					$html .= '<div class="col-md-8">';
 					
@@ -618,27 +711,29 @@ class IniEditor
 						$html .= <<<'HEREDOC'
 							<a href="javascript:;"
 							   onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())"
-							   class="down-arr">&darr;</a> <a href="javascript:;"
+							   class="down-arr">&darr;</a><a href="javascript:;"
 							   onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())"
 							   class="up-arr">&uarr;</a>
 							HEREDOC;
 						
 						if ($this->enable_delete) {
-							$html .= '<a class="remove-btn" href="javascript:;" onclick="$(this).parents(\'.form-group\').remove();">X</a> ';
+							$html .= '<a class="remove-btn" href="javascript:;" onclick="$(this).parents(\'.form-group\').remove();">×</a>';
 						}
 					}
 					
-					$html .= ' <label class="col-form-label"><input type="text" class="move-input" size="1" />' . "$label</label>";
+					$html .= ' <label class="col-form-label is-array"><input type="text" class="move-input" size="1" /><span>' . "$label</span></label>";
 					$html .= "</div>";
 					$html .= '<div class="col-md-8">';
 					$html .= '<div class="form-group vector">';
 					
 					foreach ($val as $k => $v) {
-						$html .= "<div>";
-						$html .= '<div class="col-md-10">';
-						
 						if (!is_numeric($k)) {
+							$html .= '<div class="with-array-key">';
+							$html .= '<div class="col-md-10">';
 							$html .= "<label class='array_key'>$k</label>";
+						} else {
+							$html .= "<div>";
+							$html .= '<div class="col-md-10">';
 						}
 						
 						if (is_bool($val[$k]) || $v == "1" || !$v) {
@@ -659,13 +754,13 @@ class IniEditor
 							$html .= <<< 'HEREDOC'
 								<a href="javascript:;"
 								   onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())"
-								   class="down-arr">&darr;</a> <a href="javascript:;"
+								   class="down-arr">&darr;</a><a href="javascript:;"
 								   onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())"
 								   class="up-arr">&uarr;</a>
 								HEREDOC;
 							
 							if ($this->enable_delete) {
-								$html .= ' <a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">X</a>';
+								$html .= '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>';
 							}
 						}
 						
@@ -677,7 +772,7 @@ class IniEditor
 					
 					if ($this->enable_add && $this->enable_edit) {
 						$html .= <<<'HEREDOC'
-							<table class="array_add_value width_100">
+							<table class="array_add_value">
 								<tr>
 									<td class="center">
 										<a href="javascript:;" class="btn btn-info" onclick="javascript:addArrayRow(this, 'text');">Add value</a>
