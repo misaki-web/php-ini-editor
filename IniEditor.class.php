@@ -266,10 +266,14 @@ class IniEditor
 				}
 				input.form-control[type="checkbox"] {
 					height: 20px;
-					margin-top: 0;
-					margin-left: 30px;
+					margin-top: 10px;
+					margin-left: 0;
+					padding: 0;
 					width: 20px;
 					vertical-align: middle;
+				}
+				input[type="checkbox"]:checked {
+					background-color: #0c69f0;
 				}
 				.remove-btn {
 					margin-right: 0;
