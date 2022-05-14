@@ -192,7 +192,7 @@ class IniEditor
 					margin-bottom: 20px;
 					border: 1px solid #D9D9D9;
 					border-radius: 4px;
-					padding: 20px;
+					padding: 0 20px 20px 20px;
 				}
 				.btn,
 				.btn:hover,
@@ -211,16 +211,27 @@ class IniEditor
 					background-color: #0c69f0;
 				}
 				.editor-container h3 {
-					border-bottom: 1px solid #d9d9d9;
-					margin-bottom: 20px;
+					width: calc(100% + 40px);
+					margin: 0 0 20px -20px;
+					padding: 10px;
+					background-color: #d5d5d5;
+					font-size: 1.75em;
+					font-weight: bold;
 				}
 				.config-container {
-					width: calc(100% - 50px);
-					margin-left: 50px;
+					width: 100%;
+					margin-left: 0;
 					display: block;
 				}
 				legend {
-					margin-bottom: 10px;
+					display: flex;
+					justify-content: space-between;
+					width: calc(100% + 20px);
+					margin: 0 0 10px -10px;
+					padding: 7px 10px 10px 10px;
+					background-color: #d5d5d5;
+					border-bottom: 1px solid #d9d9d9;
+					border-radius: 4px 4px 0 0;
 				}
 				textarea.form-control {
 					width: calc(100% - 70px);
@@ -247,13 +258,14 @@ class IniEditor
 				}
 				.editor-container fieldset {
 					margin-top: 20px;
-					margin-bottom: 20px;
-					padding: 10px;
+					margin-bottom: 30px;
+					padding: 0 10px 10px 10px;
 					background-color: #f2f2f2;
 					border-radius: 4px;
 				}
 				.section {
 					display: block;
+					font-weight: bold;
 				}
 				input.btn.btn-success {
 					font-size: 1.2rem;
@@ -289,17 +301,19 @@ class IniEditor
 				}
 				label.array_key {
 					margin-top: 10px;
+					font-weight: bold;
 				}
 				.form-group div:nth-child(1) .col-md-10 label.array_key {
 					margin-top: 0px;
 				}
 				.col-form-label {
-					height: 32px;
-					margin-left: 3px;
+					height: 24px;
+					margin-left: 5px;
 				}
 				.col-form-label span {
-					height: 32px;
-					line-height: 32px;
+					height: 24px;
+					line-height: 24px;
+					font-weight: bold;
 				}
 				.col-form-label.is-array span::after {
 					content: "[]";
@@ -331,14 +345,21 @@ class IniEditor
 				}
 				
 				@media only screen and (max-width: 600px) {
-					.editor-container {
-						margin: 5px;
-						padding: 5px;
+					.alert {
+						margin-left: 5px;
+						margin-right: 5px;
 					}
 					
-					.config-container {
-						width: 100%;
-						margin-left: 0;
+					.editor-container {
+						margin: 5px;
+						padding: 0 5px 5px 5px;
+					}
+					
+					.editor-container h3 {
+						width: calc(100% + 10px);
+						margin: 0 0 20px -5px;
+						padding: 5px;
+						font-size: 1.25em;
 					}
 					
 					.col-md-2 {
@@ -357,6 +378,13 @@ class IniEditor
 					
 					.col-md-10 {
 						width: 100%;
+					}
+					
+					legend {
+						display: block;
+						width: calc(100% + 20px);
+						margin: 0 0 10px -10px;
+						padding: 5px;
 					}
 					
 					textarea.form-control {
@@ -382,13 +410,15 @@ class IniEditor
 			return <<<HEREDOC
 				<style>
 					input.move-input {
-						width: 20px;
+						width: 24px;
+						height: 24px;
 						float: left;
 						display: inline;
 						background: #D9D9D9;
 						border: 3px dotted #888;
-						border-radius: 4px;
+						border-radius: 3px;
 						margin-right: 5px;
+						text-align: center;
 					}
 					input.move-input:focus {
 						background: #00c4ff;
@@ -579,7 +609,7 @@ class IniEditor
 						               '<span class="section" onclick="$(this).parent().parent().next().slideToggle();">' +
 						                 section +
 						               '</span>' +
-						               '<span>' +
+						               '<span class="btns">' +
 						                 '<a href="javascript:;" ' +
 						                     'class="btn btn-info" ' +
 						                     'onclick="addRow(this, \'text\');">' +
@@ -681,7 +711,7 @@ class IniEditor
 			
 			if ($this->enable_add && $this->enable_edit) {
 				$html .= <<<'HEREDOC'
-					<span><a href="javascript:;"
+					<span class="btns"><a href="javascript:;"
 					         class="btn btn-info"
 					         onclick="addRow(this, 'text');">Add text config</a> 
 					      <a class="btn btn-info"
