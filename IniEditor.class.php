@@ -291,6 +291,7 @@ class IniEditor
 				}
 				.col-form-label {
 					height: 32px;
+					margin-left: 3px;
 				}
 				.col-form-label span {
 					height: 32px;
@@ -366,7 +367,15 @@ class IniEditor
 	public function getScripts()
 	{
 		if ($this->enable_edit) {
-			return <<<'HEREDOC'
+			if ($this->enable_delete) {
+				$remove_btn = '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>';
+				$remove_btn_2 = '<a href="javascript:;" class="remove-btn" onclick="$(this).parents(\\\'.form-group\\\').remove();">×</a>';
+			} else {
+				$remove_btn = "";
+				$remove_btn_2 = "";
+			}
+			
+			return <<<HEREDOC
 				<style>
 					input.move-input {
 						width: 20px;
@@ -416,12 +425,9 @@ class IniEditor
 								                     'class="up-arr">' +
 								                   '&#8593;' +
 								                 '</a>' +
-								                 (
-								                   $this->enable_delete ?
-								                   '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>' :
-								                   ''
-								                 ) +
-								                 '</div></div>';
+								                 '$remove_btn' +
+								               '</div>' +
+								             '</div>';
 							} else {
 								var namekey = prompt('Which is the key of the first value (leave blank for none)?');
 								var html =   '<label class="col-form-label is-array">' +
@@ -454,11 +460,7 @@ class IniEditor
 								                       'class="up-arr">' +
 								                     '&#8593;' +
 								                   '</a>' +
-								                   (
-								                     $this->enable_delete ?
-								                     '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>' :
-								                     ''
-								                   ) +
+								                   '$remove_btn' +
 								                 '</div>' +
 								               '</div>' +
 								             '</div>';
@@ -516,11 +518,7 @@ class IniEditor
 						             'class="up-arr">' +
 						           '&uarr;' +
 						         '</a>' +
-						         (
-						           $this->enable_delete ?
-						           '<a href="javascript:;" class="remove-btn" onclick="$(this).parents(\'.form-group\').remove();">×</a>' :
-						           ''
-						         ) +
+						         '$remove_btn_2' +
 						         html;
 						
 						html = '<div class="form-group row">' + html + '</div>';
@@ -556,11 +554,7 @@ class IniEditor
 						              'class="up-arr">' +
 						            '&uarr;' +
 						          '</a>' +
-						          (
-						            $this->enable_delete ?
-						            '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>' :
-						            ''
-						          ) +
+						          '$remove_btn' +
 						        '</div>';
 						
 						$(obj).parents('.col-md-8').find('.form-group:first').append(html);
@@ -719,7 +713,7 @@ class IniEditor
 						}
 					}
 					
-					$html .= ' <label class="col-form-label"><input type="text" class="move-input" size="1"/><span>' . "$label</span></label>";
+					$html .= '<label class="col-form-label"><input type="text" class="move-input" size="1"/><span>' . "$label</span></label>";
 					$html .= "</div>";
 					$html .= '<div class="col-md-8">';
 					
@@ -755,7 +749,7 @@ class IniEditor
 						}
 					}
 					
-					$html .= ' <label class="col-form-label is-array"><input type="text" class="move-input" size="1" /><span>' . "$label</span></label>";
+					$html .= '<label class="col-form-label is-array"><input type="text" class="move-input" size="1" /><span>' . "$label</span></label>";
 					$html .= "</div>";
 					$html .= '<div class="col-md-8">';
 					$html .= '<div class="form-group vector">';
