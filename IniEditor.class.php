@@ -721,7 +721,7 @@ class IniEditor
 		$conf = parse_ini_file($this->ini_file, true, $this->scanner_mode);
 		
 		$html .= <<<HEREDOC
-			<form method="post">
+			<form method="post" action="#top">
 				<input type="hidden" name="save_ini_form" value="1" />
 				<input type="hidden" name="ini_file" value="{$this->ini_file}" />
 			HEREDOC;
