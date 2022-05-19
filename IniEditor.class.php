@@ -740,7 +740,7 @@ class IniEditor
 			$html .= $this->saveForm();
 		}
 		
-		$html .= '<h3><span class="h3-label">Selected file:</span> <span class="filename">' . $this->ini_file . "</span></h3>";
+		$html .= '<h3><span class="h3-label">Updating the file</span> <span class="filename">"' . $this->ini_file . '"</span></h3>';
 		
 		if ($this->enable_add && $this->enable_edit) {
 			$html .= '<span><a href="javascript:;" class="btn btn-primary" onclick="addSection(this);">Add section</a></span>';
