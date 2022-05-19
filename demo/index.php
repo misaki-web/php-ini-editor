@@ -24,7 +24,7 @@
 			$ini_editor->setBackupFolder('backups');
 			
 			// set different Scanner Mode (optional)
-			$ini_editor->setScannerMode(INI_SCANNER_RAW);
+			$ini_editor->setScannerMode(INI_SCANNER_NORMAL);
 			
 			// set the path of the file you want to edit or view
 			$ini_editor->setIniFile('demo.ini');
@@ -42,10 +42,16 @@
 			echo $ini_editor->getScripts();
 		?>
 	</head>
-	<body>
+	<body id="top">
+		<div class="scroll go-to-bottom"><a href="#bottom"> ⇓ </a></div>
+		
 		<?php
 			// print the form. Use $ini_editor->getForm() to store it in a variable
 			$ini_editor->printForm();
 		?>
+		
+		<div class="scroll go-to-top"><a href="#top"> ⇑ </a></div>
+		
+		<div id="bottom"></div>
 	</body>
 </html>

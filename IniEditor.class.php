@@ -178,8 +178,8 @@ class IniEditor
 				[onclick] {
 					cursor:pointer;
 				}
-				.editor-container,
-				.alert {
+				body,
+				.scroll {
 					max-width: 1250px;
 					margin-left: auto;
 					margin-right: auto;
@@ -188,11 +188,8 @@ class IniEditor
 					margin-top: 5px;
 				}
 				.editor-container {
-					margin-top: 20px;
-					margin-bottom: 20px;
-					border: 1px solid #D9D9D9;
-					border-radius: 4px;
-					padding: 0 20px 20px 20px;
+					margin-top: 15px;
+					margin-bottom: 15px;
 				}
 				.btn,
 				.btn:hover,
@@ -211,10 +208,7 @@ class IniEditor
 					background-color: #0c69f0;
 				}
 				.editor-container h3 {
-					width: calc(100% + 40px);
-					margin: 0 0 20px -20px;
-					padding: 10px;
-					background-color: #d5d5d5;
+					padding-bottom: 5px;
 					font-size: 1.75em;
 					font-weight: bold;
 				}
@@ -236,7 +230,7 @@ class IniEditor
 				textarea.form-control {
 					width: calc(100% - 70px);
 					display: inline-block;
-					padding: 10px 7px 0px 7px;
+					padding: 7px 7px 0px 7px;
 				}
 				.col-md-10 textarea.form-control {
 					width: 100%;
@@ -258,7 +252,7 @@ class IniEditor
 				}
 				.editor-container fieldset {
 					margin-top: 20px;
-					margin-bottom: 30px;
+					margin-bottom: 45px;
 					padding: 0 10px 10px 10px;
 					background-color: #f2f2f2;
 					border-radius: 4px;
@@ -343,6 +337,31 @@ class IniEditor
 				.filename {
 					font-family: monospace;
 				}
+				.scroll {
+					position: fixed;
+					width: 100%;
+					text-align: right;
+				}
+				.scroll a,
+				.scroll a:hover {
+					text-decoration: none;
+				}
+				.scroll a {
+					display: inline-block;
+					width: 30px;
+					margin-right: -35px;
+					border: 1px solid #ced4da;
+					background-color: #f2f2f2;
+					border-radius: 4px;
+					font-size: 2em;
+					font-weight: bold;
+				}
+				.go-to-bottom {
+					top: 10px;
+				}
+				.go-to-top {
+					bottom: 10px;
+				}
 				
 				@media only screen and (max-width: 600px) {
 					.alert {
@@ -351,15 +370,15 @@ class IniEditor
 					}
 					
 					.editor-container {
-						margin: 5px;
-						padding: 0 5px 5px 5px;
+						margin: 10px;
 					}
 					
 					.editor-container h3 {
-						width: calc(100% + 10px);
-						margin: 0 0 20px -5px;
-						padding: 5px;
 						font-size: 1.25em;
+					}
+					
+					.editor-container fieldset {
+						margin-bottom: 30px;
 					}
 					
 					.col-md-2 {
@@ -380,6 +399,10 @@ class IniEditor
 						width: 100%;
 					}
 					
+					.col-form-label {
+						margin-bottom: 10px;
+					}
+					
 					legend {
 						display: block;
 						width: calc(100% + 20px);
@@ -389,6 +412,10 @@ class IniEditor
 					
 					textarea.form-control {
 						width: 100%;
+					}
+					
+					.scroll a {
+						margin-right: 10px;
 					}
 				}
 			</style>
