@@ -144,10 +144,10 @@ class IniEditor
 				
 				if (is_array($val)) {
 					foreach ($val as $k => $v) {
-						$save[$conf[1]][] = $conf[2] . "[" . (!is_numeric($k) ? $k : "") . "] = " . $this->wrapValue($v, $conf[3]);
+						$save[$conf[1]][] = $conf[2] . "[" . (!is_numeric($k) ? $k : "") . "]=" . $this->wrapValue($v, $conf[3]);
 					}
 				} else {
-					$save[$conf[1]][] = $conf[2] . " = " . $this->wrapValue($val, $conf[3]);
+					$save[$conf[1]][] = $conf[2] . "=" . $this->wrapValue($val, $conf[3]);
 				}
 			}
 			
@@ -156,7 +156,7 @@ class IniEditor
 			foreach ($save as $section => $rows) {
 				$content .= "[$section]\n";
 				$content .= implode("\n", $rows);
-				$content .= "\n\n\n";
+				$content .= "\n\n";
 			}
 			
 			$res = file_put_contents($_REQUEST["ini_file"], $content);
