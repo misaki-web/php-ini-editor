@@ -261,6 +261,10 @@ class IniEditor
 					align-items: center;
 					margin-bottom: 10px;
 				}
+				.config-container > div.form-group.row:not(:last-child) {
+					border-bottom: 1px solid #a9a9a947;
+					margin-bottom: 10px;
+				}
 				.config-container > div.form-group.row:last-child .col-md-8,
 				.config-container > div.form-group.row:last-child .col-md-8 .array_add_value {
 					margin-bottom: 0;
