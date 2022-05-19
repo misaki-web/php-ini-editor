@@ -287,16 +287,17 @@ class IniEditor
 					position: relative;
 					z-index: 10;
 				}
-				input.form-control[type="checkbox"] {
+				input[type="checkbox"] {
 					height: 20px;
 					margin-top: 10px;
 					margin-left: 0;
 					padding: 0;
 					width: 20px;
 					vertical-align: middle;
+					accent-color: #0c69f0;
 				}
-				input[type="checkbox"]:checked {
-					background-color: #0c69f0;
+				.col-md-10 input[type="checkbox"][name*="#bool"] {
+					margin-top: -10px;
 				}
 				.remove-btn {
 					margin-right: 0;
@@ -311,6 +312,7 @@ class IniEditor
 					margin-top: 20px;
 				}
 				label.array_key {
+					display: block;
 					margin-top: 10px;
 					font-weight: bold;
 				}
@@ -491,7 +493,7 @@ class IniEditor
 								           '<div class="col-md-8">' +
 								             '<div class="form-group vector">' +
 								               '<div>' +
-								                 '<input class="form-control" type="checkbox" ' +
+								                 '<input type="checkbox" ' +
 								                         'name="ini#' + section + '#' + name + '#' + type + '[]" /> ' +
 								                 '<a href="javascript:;" ' +
 								                     'onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())" ' +
@@ -568,7 +570,7 @@ class IniEditor
 								             '</label>' +
 								           '</div>' +
 								           '<div class="col-md-8">' +
-								             '<input class="form-control" type="checkbox" name="ini#' + section + '#' + name + '#' + type + '" />' +
+								             '<input type="checkbox" name="ini#' + section + '#' + name + '#' + type + '" />' +
 								           '</div>';
 							} else {
 								var html =   '<label class="col-form-label">' +
@@ -804,7 +806,7 @@ class IniEditor
 						(!$val && $val != "")
 					) {
 						$html .= "<input class='form_checkbox' type='hidden' name='ini#$c#$label#bool' value='0' />";
-						$html .= "<input class='form-control' type='checkbox' name='ini#$c#$label#bool' value='1'" .
+						$html .= "<input type='checkbox' name='ini#$c#$label#bool' value='1'" .
 						         ($val ? ' checked="checked"' : "") . " />";
 					} else {
 						$html .= "<textarea rows='1' class='form-control' name='ini#$c#$label#text'>" .
