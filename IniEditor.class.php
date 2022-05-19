@@ -25,6 +25,21 @@ class IniEditor
 	protected $enable_delete = true;
 	protected $scanner_mode = INI_SCANNER_NORMAL;
 	
+	public static function format_value($value)
+	{
+		if ($value === "true") {
+			$formatted = true;
+		} else if ($value === "false") {
+			$formatted = false;
+		}
+		
+		if (!isset($formatted)) {
+			$formatted = $value;
+		}
+		
+		return $formatted;
+	}
+	
 	// contructor
 	public function __construct()
 	{
@@ -757,6 +772,8 @@ class IniEditor
 			$html .= '<div class="config-container container">' . "\n";
 			
 			foreach ($cv as $label => $val) {
+				$val = IniEditor::format_value($val);
+				
 				$html .= '<div class="form-group row">';
 				
 				if (!is_array($val)) {
@@ -783,6 +800,7 @@ class IniEditor
 					if (
 						(isset($c[$label]) && is_bool($c[$label])) ||
 						$val == "1" ||
+						$val === true || $val === false ||
 						(!$val && $val != "")
 					) {
 						$html .= "<input class='form_checkbox' type='hidden' name='ini#$c#$label#bool' value='0' />";
@@ -818,6 +836,8 @@ class IniEditor
 					$html .= '<div class="form-group vector">';
 					
 					foreach ($val as $k => $v) {
+						$v = IniEditor::format_value($v);
+						
 						if (!is_numeric($k)) {
 							$html .= '<div class="with-array-key">';
 							$html .= '<div class="col-md-10">';
@@ -827,7 +847,12 @@ class IniEditor
 							$html .= '<div class="col-md-10">';
 						}
 						
-						if (is_bool($val[$k]) || $v == "1" || !$v) {
+						if (
+							is_bool($val[$k]) ||
+							$v == "1" ||
+							$v === true || $v === false ||
+							!$v
+						) {
 							$html .= "<input class='form_checkbox' type='hidden' name='ini#$c#$label#bool[]' />";
 							$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c#$label#bool[]' value='1'" .
 							         ($v ? ' checked="checked"' : "") . " />";
