@@ -269,6 +269,8 @@ class IniEditor
 					display: block;
 					min-width: 150px;
 					font-weight: bold;
+					position: relative;
+					z-index: 10;
 				}
 				input.form-control[type="checkbox"] {
 					height: 20px;
