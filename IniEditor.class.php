@@ -236,7 +236,7 @@ class IniEditor
 					display: flex;
 					justify-content: space-between;
 					width: calc(100% + 20px);
-					margin: 0 0 10px -10px;
+					margin: 0 0 0 -10px;
 					padding: 7px 10px 10px 10px;
 					background-color: #d5d5d5;
 					border-bottom: 1px solid #d9d9d9;
@@ -245,10 +245,13 @@ class IniEditor
 				textarea.form-control {
 					width: calc(100% - 70px);
 					display: inline-block;
-					padding: 7px 7px 0px 7px;
+					padding: 7px;
 				}
 				.col-md-10 textarea.form-control {
 					width: 100%;
+				}
+				div:not(.form-group.vector) > div > div > textarea.form-control {
+					margin-top: 10px;
 				}
 				.form-group.vector {
 					display: inline-block;
@@ -259,11 +262,11 @@ class IniEditor
 					display: flex;
 					flex-direction: row;
 					align-items: center;
-					margin-bottom: 10px;
+					margin-top: 10px;
+					margin-bottom: 0;
 				}
 				.config-container > div.form-group.row:not(:last-child) {
 					border-bottom: 1px solid #a9a9a947;
-					margin-bottom: 10px;
 				}
 				.config-container > div.form-group.row:last-child .col-md-8,
 				.config-container > div.form-group.row:last-child .col-md-8 .array_add_value {
@@ -342,6 +345,7 @@ class IniEditor
 				}
 				.col-md-4 {
 					width: 25%;
+					margin-top: 7px;
 				}
 				.col-md-8 {
 					width: 75%;
@@ -352,7 +356,7 @@ class IniEditor
 					width: auto;
 				}
 				.array_add_value {
-					margin-bottom: 15px;
+					margin-top: 10px;
 				}
 				.center {
 					text-align: center;
@@ -684,12 +688,6 @@ class IniEditor
 						$(obj).parents('.editor-container').find('form').prepend(html);
 					}
 					
-					$(function() {
-						$('.move-input:not(.move-initialized)').keydown(function(e) {
-							moveOrder(this, e.which);
-						});
-					});
-					
 					function moveOrder(obj, which) {
 						$(obj).addClass('move-initialized');
 						
@@ -705,6 +703,21 @@ class IniEditor
 							$(obj).focus();
 						}
 					}
+					
+					$(function() {
+						$('.move-input:not(.move-initialized)').keydown(function(e) {
+							moveOrder(this, e.which);
+						});
+					});
+					
+					$(document).ready(function() {
+						$('textarea').each(function() {
+							this.setAttribute('style', 'height: ' + (this.scrollHeight) + 'px; overflow-y: hidden;');
+						}).on('input', function() {
+							this.style.height = 'auto';
+							this.style.height = (this.scrollHeight) + 'px';
+						});
+					});
 				</script>
 				HEREDOC;
 		} else {
