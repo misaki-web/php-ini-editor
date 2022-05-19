@@ -2,7 +2,13 @@
 
 This PHP class provides a Web editor for INI files. The theme is desktop and mobile friendly.
 
+## Usage
+
 See the folder `demo` for details about how to use the class.
+
+## Screenshots
+
+![PHP INI Editor screenshot](https://raw.githubusercontent.com/misaki-web/php-ini-editor/main/images/screenshots/screenshot.png)
 
 ## License
 
