@@ -24,7 +24,7 @@
 			$ini_editor->setBackupFolder('backups');
 			
 			// set different Scanner Mode (optional)
-			$ini_editor->setScannerMode(INI_SCANNER_NORMAL);
+			$ini_editor->setScannerMode(INI_SCANNER_TYPED);
 			
 			// set the path of the file you want to edit or view
 			$ini_editor->setIniFile('demo.ini');

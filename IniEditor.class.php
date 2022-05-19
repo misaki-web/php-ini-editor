@@ -23,7 +23,7 @@ class IniEditor
 	protected $enable_edit = true;
 	protected $enable_add = true;
 	protected $enable_delete = true;
-	protected $scanner_mode = INI_SCANNER_NORMAL;
+	protected $scanner_mode = INI_SCANNER_TYPED; # INI_SCANNER_NORMAL | INI_SCANNER_RAW | INI_SCANNER_TYPED
 	
 	public static function format_value($value)
 	{
