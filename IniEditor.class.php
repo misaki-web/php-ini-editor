@@ -211,7 +211,7 @@ class IniEditor
 				.btn:active,
 				.btn:focus {
 					font-size: 0.9rem;
-					padding: 3px;
+					padding: 3px 6px;
 					background-color: #0b5ed7;
 					border: none;
 					border-radius: 4px;
