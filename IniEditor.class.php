@@ -51,7 +51,7 @@ class IniEditor
 	// contructor
 	public function __construct()
 	{
-		$this->backup_folder = "backup/";
+		$this->backup_folder = "backup";
 	}
 	
 	// set INI file to edit
@@ -135,7 +135,7 @@ class IniEditor
 		}
 		
 		$backup = file_put_contents(
-			$this->backup_folder . "/" . $this->backupFilename($_REQUEST["ini_file"]) . "." . date("Ymd_His"),
+			$this->backup_folder . "/" . date("Y-m-d_H-i-s") . "_" . $this->backupFilename($_REQUEST["ini_file"]),
 			file_get_contents($_REQUEST["ini_file"])
 		);
 		
