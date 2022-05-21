@@ -40,6 +40,14 @@ class IniEditor
 		return $formatted;
 	}
 	
+	public static function base64_encode_url($value) {
+		return rtrim(strtr(base64_encode($value), "+/", "-_"), "=");
+	}
+	
+	public static function base64_decode_url($value) {
+		return base64_decode(str_pad(strtr($value, "-_", "+/"), strlen($value) % 4, "=", STR_PAD_RIGHT));
+	}
+	
 	// contructor
 	public function __construct()
 	{
@@ -136,18 +144,24 @@ class IniEditor
 			$save = [];
 			
 			foreach ($vals as $key => $val) {
+				$key = substr($key, 4);
 				$conf = explode("#", $key);
 				
-				if (!isset($save[$conf[1]])) {
-					$save[$conf[1]] = [];
+				for ($i = 0; $i < 2; $i++) {
+					$conf[$i] = IniEditor::base64_decode_url($conf[$i]);
+				}
+				
+				if (!isset($save[$conf[0]])) {
+					$save[$conf[0]] = [];
 				}
 				
 				if (is_array($val)) {
 					foreach ($val as $k => $v) {
-						$save[$conf[1]][] = $conf[2] . "[" . (!is_numeric($k) ? $k : "") . "]=" . $this->wrapValue($v, $conf[3]);
+						$k = IniEditor::base64_decode_url($k);
+						$save[$conf[0]][] = $conf[1] . "[" . (!is_numeric($k) ? $k : "") . "]=" . $this->wrapValue($v, $conf[2]);
 					}
 				} else {
-					$save[$conf[1]][] = $conf[2] . "=" . $this->wrapValue($val, $conf[3]);
+					$save[$conf[0]][] = $conf[1] . "=" . $this->wrapValue($val, $conf[2]);
 				}
 			}
 			
@@ -480,6 +494,10 @@ class IniEditor
 				</style>
 				
 				<script>
+					function base64_encode_url(value) {
+						return btoa(value).replaceAll('+', '-').replaceAll('/', '_').replace(/\=+$/, '');
+					}
+					
 					function addRow(obj, type, isarray) {
 						var name = prompt('Which is the name of the new config field?');
 						
@@ -502,7 +520,9 @@ class IniEditor
 								             '<div class="form-group vector">' +
 								               '<div>' +
 								                 '<input type="checkbox" ' +
-								                         'name="ini#' + section + '#' + name + '#' + type + '[]" /> ' +
+								                         'name="ini#' + base64_encode_url(section) +
+								                               '#' + base64_encode_url(name) +
+								                               '#' + type + '[]" /> ' +
 								                 '<a href="javascript:;" ' +
 								                     'onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())" ' +
 								                     'class="down-arr">' +
@@ -534,7 +554,9 @@ class IniEditor
 								                   '</label>' +
 								                   '<textarea rows="1" ' +
 								                              'class="form-control" ' +
-								                              'name="ini#' + section + '#' + name + '#' + type + '[' + namekey + ']">' +
+								                              'name="ini#' + base64_encode_url(section) +
+								                                    '#' + base64_encode_url(name) +
+								                                    '#' + type + '[' + base64_encode_url(namekey) + ']">' +
 								                   '</textarea>' +
 								                 '</div>' +
 								                 '<div class="col-md-2">' +
@@ -578,7 +600,10 @@ class IniEditor
 								             '</label>' +
 								           '</div>' +
 								           '<div class="col-md-8">' +
-								             '<input type="checkbox" name="ini#' + section + '#' + name + '#' + type + '" />' +
+								             '<input type="checkbox" ' +
+								                     'name="ini#' + base64_encode_url(section) +
+								                           '#' + base64_encode_url(name) +
+								                           '#' + type + '" />' +
 								           '</div>';
 							} else {
 								var html =   '<label class="col-form-label">' +
@@ -589,7 +614,11 @@ class IniEditor
 								             '</label>' +
 								           '</div>' +
 								           '<div class="col-md-8">' +
-								             '<textarea rows="1" class="form-control" name="ini#' + section + '#' + name + '#' + type + '">' +
+								             '<textarea rows="1" ' +
+								                        'class="form-control" ' +
+								                        'name="ini#' + base64_encode_url(section) +
+								                              '#' + base64_encode_url(name) +
+								                              '#' + type + '">' +
 								             '</textarea>' +
 								           '</div>';
 							}
@@ -627,7 +656,11 @@ class IniEditor
 						               '<label class="array_key">' +
 						                 namekey +
 						               '</label>' +
-						               '<textarea rows="1" class="form-control" name="ini#' + section + '#' + name + '#' + type + '[' + namekey + ']">' +
+						               '<textarea rows="1" ' +
+						                          'class="form-control" ' +
+						                          'name="ini#' + base64_encode_url(section) +
+						                                '#' + base64_encode_url(name) +
+						                                '#' + type + '[' + base64_encode_url(namekey) + ']">' +
 						               '</textarea>' +
 						             '</div>';
 						
@@ -816,17 +849,20 @@ class IniEditor
 					$html .= "</div>";
 					$html .= '<div class="col-md-8">';
 					
+					$c_base64_url = IniEditor::base64_encode_url($c);
+					$label_base64_url = IniEditor::base64_encode_url($label);
+					
 					if (
 						(isset($c[$label]) && is_bool($c[$label])) ||
 						$val == "1" ||
 						$val === true || $val === false ||
 						(!$val && $val != "")
 					) {
-						$html .= "<input class='form_checkbox' type='hidden' name='ini#$c#$label#bool' value='0' />";
-						$html .= "<input type='checkbox' name='ini#$c#$label#bool' value='1'" .
+						$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool' value='0' />";
+						$html .= "<input type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool' value='1'" .
 						         ($val ? ' checked="checked"' : "") . " />";
 					} else {
-						$html .= "<textarea rows='1' class='form-control' name='ini#$c#$label#text'>" .
+						$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>" .
 						         str_replace('\\"', '"', $val) .
 						         "</textarea>";
 					}
@@ -866,17 +902,22 @@ class IniEditor
 							$html .= '<div class="col-md-10">';
 						}
 						
+						$c_base64_url = IniEditor::base64_encode_url($c);
+						$label_base64_url = IniEditor::base64_encode_url($label);
+						
 						if (
 							is_bool($val[$k]) ||
 							$v == "1" ||
 							$v === true || $v === false ||
 							!$v
 						) {
-							$html .= "<input class='form_checkbox' type='hidden' name='ini#$c#$label#bool[]' />";
-							$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c#$label#bool[]' value='1'" .
+							$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool[]' />";
+							$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool[]' value='1'" .
 							         ($v ? ' checked="checked"' : "") . " />";
 						} else {
-							$html .= "<textarea rows='1' class='form-control' name='ini#$c#$label#text[$k]'>" .
+							$k_base64_url = IniEditor::base64_encode_url($k);
+							
+							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>" .
 							         str_replace('\\"', '"', $v) .
 							         "</textarea>";
 						}
