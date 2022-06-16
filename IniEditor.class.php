@@ -820,8 +820,6 @@ class IniEditor
 			$html .= '<h4 style="color:red;">' . $this->ini_file . " is not writable</h4>";
 		}
 		
-		error_reporting(E_ALL);
-		
 		$conf = parse_ini_file($this->ini_file, true, $this->scanner_mode);
 		
 		$html .= <<<HEREDOC
