@@ -208,6 +208,8 @@ class IniEditor
 					cursor:pointer;
 				}
 				body,
+				.title-container,
+				.save-button,
 				.scroll {
 					max-width: 1250px;
 					margin-left: auto;
@@ -217,7 +219,7 @@ class IniEditor
 					margin-top: 5px;
 				}
 				.editor-container {
-					margin-top: 15px;
+					margin-top: 0;
 					margin-bottom: 15px;
 				}
 				.btn,
@@ -236,9 +238,42 @@ class IniEditor
 				.btn:focus {
 					background-color: #0c69f0;
 				}
-				.editor-container h3 {
-					padding-bottom: 5px;
+				.title-container,
+				.save-button {
+					position: fixed;
+					top: 0;
+				}
+				.title-container {
+					display: flex;
+					align-items: center;
+					width: 100%;
+					min-height: 70px;
+					padding: 10px 0 10px 5px;
+					background-color: #f2f2f2;
+					box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+					border-radius: 0 0 4px 4px;
+				}
+				.title-container h3 {
+					margin-top: 0;
+					margin-bottom: 0;
+					padding-right: 160px;
 					font-size: 1.75em;
+					font-weight: bold;
+				}
+				.editor-container > form {
+					padding-top: 75px;
+				}
+				.save-button {
+					width: 100%;
+					padding: 10px 5px 10px 0;
+				}
+				input.btn.btn-success {
+					display: block;
+					width: 150px;
+					height: 50px;
+					margin-left: auto;
+					padding: 10px;
+					font-size: 1.2rem;
 					font-weight: bold;
 				}
 				.config-container {
@@ -296,17 +331,6 @@ class IniEditor
 				.section {
 					display: block;
 					font-weight: bold;
-				}
-				input.btn.btn-success {
-					font-size: 1.2rem;
-					padding: 10px;
-					margin-left: auto;
-					margin-right: auto;
-					display: block;
-					min-width: 150px;
-					font-weight: bold;
-					position: relative;
-					z-index: 10;
 				}
 				input[type="checkbox"] {
 					height: 20px;
@@ -390,6 +414,7 @@ class IniEditor
 				.scroll a {
 					display: inline-block;
 					width: 30px;
+					height: 50px;
 					margin-right: -35px;
 					border: 1px solid #ced4da;
 					background-color: #f2f2f2;
@@ -413,9 +438,19 @@ class IniEditor
 					.editor-container {
 						margin: 10px;
 					}
-					
-					.editor-container h3 {
+					.title-container,
+					.save-button {
+						width: calc(100% - 20px);
+					}
+					.title-container h3 {
+						padding-right: 60px;
 						font-size: 1.25em;
+					}
+					
+					input.btn.btn-success {
+						width: 50px;
+						padding: 2px;
+						font-size: 1rem;
 					}
 					
 					.editor-container fieldset {
@@ -773,7 +808,9 @@ class IniEditor
 			$html .= $this->saveForm();
 		}
 		
-		$html .= '<h3><span class="h3-label">Updating the file</span> <span class="filename">"' . $this->ini_file . '"</span></h3>';
+		$html .= '<div class="title-container">' .
+		         '<h3><span class="title-label">Updating the file</span> <span class="filename">"' . $this->ini_file . '"</span></h3>' .
+		         '</div>';
 		
 		if ($this->enable_add && $this->enable_edit) {
 			$html .= '<span><a href="javascript:;" class="btn btn-primary" onclick="addSection(this);">Add section</a></span>';
@@ -792,6 +829,14 @@ class IniEditor
 				<input type="hidden" name="save_ini_form" value="1" />
 				<input type="hidden" name="ini_file" value="{$this->ini_file}" />
 			HEREDOC;
+		
+		if ($this->enable_edit) {
+			$html .= <<<HEREDOC
+				<div class="save-button">
+					<input type="Submit" class="btn btn-success" value="Save" />
+				</div>
+				HEREDOC;
+		}
 		
 		$additional = [];
 		
@@ -966,10 +1011,6 @@ class IniEditor
 			
 			$html .= "</div>";
 			$html .= "</fieldset>\n";
-		}
-		
-		if ($this->enable_edit) {
-			$html .= '<input type="Submit" class="btn btn-success" value="Save" />';
 		}
 		
 		$html .= "</form>";
