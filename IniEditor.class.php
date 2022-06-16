@@ -18,14 +18,33 @@
 
 class IniEditor
 {
-	protected $ini_file;
-	protected $backup_folder;
+	protected $ini_file = '';
+	protected $backup_folder = 'backup';
 	protected $enable_edit = true;
 	protected $enable_add = true;
 	protected $enable_delete = true;
 	protected $scanner_mode = INI_SCANNER_TYPED; # INI_SCANNER_NORMAL | INI_SCANNER_RAW | INI_SCANNER_TYPED
 	
-	public static function format_value($value)
+	################################################################################
+	# 
+	# PRIVATE
+	# 
+	################################################################################
+	
+	private function backupFilename($filename)
+	{
+		return str_replace("/", "_", $filename);
+	}
+	
+	private static function base64EncodeUrl($value) {
+		return rtrim(strtr(base64_encode($value), "+/", "-_"), "=");
+	}
+	
+	private static function base64DecodeUrl($value) {
+		return base64_decode(str_pad(strtr($value, "-_", "+/"), strlen($value) % 4, "=", STR_PAD_RIGHT));
+	}
+	
+	private static function formatValue($value)
 	{
 		if ($value === "true") {
 			$formatted = true;
@@ -40,78 +59,16 @@ class IniEditor
 		return $formatted;
 	}
 	
-	public static function base64_encode_url($value) {
-		return rtrim(strtr(base64_encode($value), "+/", "-_"), "=");
-	}
-	
-	public static function base64_decode_url($value) {
-		return base64_decode(str_pad(strtr($value, "-_", "+/"), strlen($value) % 4, "=", STR_PAD_RIGHT));
-	}
-	
-	// contructor
-	public function __construct()
+	// Initialize properties.
+	private function init()
 	{
-		$this->backup_folder = "backup";
-	}
-	
-	// set INI file to edit
-	public function setIniFile($file)
-	{
-		$this->ini_file = $file;
-	}
-	
-	// set backup folder where to save the backup before saving the new version
-	public function setBackupFolder($folder)
-	{
-		$this->backup_folder = $folder;
-	}
-	
-	// enable editing of the file
-	public function enableEdit($bool)
-	{
-		$this->enable_edit = $bool;
-	}
-	
-	// enable adding conf and sections in the file
-	public function enableAdd($bool)
-	{
-		$this->enable_add = $bool;
-	}
-	
-	// enable adding conf and sections in the file
-	public function enableDelete($bool)
-	{
-		$this->enable_delete = $bool;
-	}
-	
-	// get backup filename
-	public function backupFilename($filename)
-	{
-		return str_replace("/", "_", $filename);
-	}
-	
-	// set Scanner Mode in parsing the ini file
-	public function setScannerMode($mode)
-	{
-		$this->scanner_mode = $mode;
-	}
-	
-	// wrap a value inside quotes
-	public function wrapValue($val, $type)
-	{
-		if ($type == "bool") {
-			if ($val) {
-				return "true";
-			} else {
-				return "false";
-			}
-		} else {
-			return '"' . str_replace('"', '\\"', $val) . '"';
+		if (isset($_REQUEST["ini_file"])) {
+			$this->ini_file = static::base64DecodeUrl($_REQUEST["ini_file"]);
 		}
 	}
 	
-	// find values in array using regexp on the key
-	public function preg_grep_keys($pattern, $input, $flags = 0)
+	// Find values in array using regexp on the key.
+	private function pregGrepKeys($pattern, $input, $flags = 0)
 	{
 		$keys = preg_grep($pattern, array_keys($input), $flags);
 		$vals = [];
@@ -123,9 +80,12 @@ class IniEditor
 		return $vals;
 	}
 	
-	// save the new file from form request
-	public function saveForm()
+	// Save new file from form request.
+	private function saveForm()
 	{
+		$ret = '';
+		$this->init();
+		
 		if (!$this->enable_edit) {
 			return;
 		}
@@ -135,12 +95,12 @@ class IniEditor
 		}
 		
 		$backup = file_put_contents(
-			$this->backup_folder . "/" . date("Y-m-d_H-i-s") . "_" . $this->backupFilename($_REQUEST["ini_file"]),
-			file_get_contents($_REQUEST["ini_file"])
+			$this->backup_folder . "/" . date("Y-m-d_H-i-s") . "_" . $this->backupFilename($this->ini_file),
+			file_get_contents($this->ini_file)
 		);
 		
 		if ($backup) {
-			$vals = $this->preg_grep_keys('/ini#.*$/', $_REQUEST);
+			$vals = $this->pregGrepKeys('/ini#.*$/', $_REQUEST);
 			$save = [];
 			
 			foreach ($vals as $key => $val) {
@@ -148,7 +108,7 @@ class IniEditor
 				$conf = explode("#", $key);
 				
 				for ($i = 0; $i < 2; $i++) {
-					$conf[$i] = IniEditor::base64_decode_url($conf[$i]);
+					$conf[$i] = static::base64DecodeUrl($conf[$i]);
 				}
 				
 				if (!isset($save[$conf[0]])) {
@@ -157,7 +117,7 @@ class IniEditor
 				
 				if (is_array($val)) {
 					foreach ($val as $k => $v) {
-						$k = IniEditor::base64_decode_url($k);
+						$k = static::base64DecodeUrl($k);
 						$save[$conf[0]][] = $conf[1] . "[" . (!is_numeric($k) ? $k : "") . "]=" . $this->wrapValue($v, $conf[2]);
 					}
 				} else {
@@ -173,33 +133,83 @@ class IniEditor
 				$content .= "\n\n";
 			}
 			
-			$res = file_put_contents($_REQUEST["ini_file"], $content);
+			$res = file_put_contents($this->ini_file, $content);
 			
 			if ($res) {
-				echo '<div class="alert alert-success"><span class="filename">' . $_REQUEST["ini_file"] . "</span> saved</div>";
+				$ret = '<div id="msg" class="msg-success"><span class="filename">' . $this->ini_file . "</span> saved</div>";
 			} else {
-				echo '<div class="alert alert-error"><span class="filename">' . $_REQUEST["ini_file"] . "</span> cannot be saved</div>";
+				$ret = '<div id="msg" class="msg-error"><span class="filename">' . $this->ini_file . "</span> cannot be saved</div>";
 			}
 		} else {
-			echo '<div class="alert alert-error">Check write permissions on ' . $this->backup_folder . "</div>";
+			$ret = '<div id="msg" class="msg-error">Check write permissions on ' . $this->backup_folder . "</div>";
+		}
+		
+		return $ret;
+	}
+	
+	// Wrap value inside quotes.
+	private function wrapValue($val, $type)
+	{
+		if ($type == "bool") {
+			if ($val) {
+				return "true";
+			} else {
+				return "false";
+			}
+		} else {
+			return '"' . str_replace('"', '\\"', $val) . '"';
 		}
 	}
 	
-	// get Javascript and CSS from jQuery and Bootstrap CDN
-	public static function getCssJsInclude()
+	################################################################################
+	# 
+	# PUBLIC
+	# 
+	################################################################################
+	
+	// Contructor.
+	public function __construct()
 	{
-		return <<<'HEREDOC'
-			<script src="https://code.jquery.com/jquery-3.6.0.min.js"
-			        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-			        crossorigin="anonymous"></script>
-			<link rel="stylesheet"
-			      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-			      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-			      crossorigin="anonymous" />
-			HEREDOC;
+		
 	}
 	
-	// get class CSS (use your own if you prefer)
+	// Set the INI file to edit.
+	public function setIniFile($file)
+	{
+		$this->ini_file = $file;
+	}
+	
+	// Set the backup folder where to create a backup before saving the new version.
+	public function setBackupFolder($folder)
+	{
+		$this->backup_folder = $folder;
+	}
+	
+	// Enable file editing.
+	public function enableEdit($bool)
+	{
+		$this->enable_edit = $bool;
+	}
+	
+	// Enable adding conf and sections.
+	public function enableAdd($bool)
+	{
+		$this->enable_add = $bool;
+	}
+	
+	// Enable deleting conf.
+	public function enableDelete($bool)
+	{
+		$this->enable_delete = $bool;
+	}
+	
+	// Set the scanner mode when parsing the INI file.
+	public function setScannerMode($mode)
+	{
+		$this->scanner_mode = $mode;
+	}
+	
+	// Get CSS style.
 	public static function getCSS()
 	{
 		return <<<'HEREDOC'
@@ -215,8 +225,20 @@ class IniEditor
 					margin-left: auto;
 					margin-right: auto;
 				}
-				.alert {
-					margin-top: 5px;
+				#msg {
+					margin-top: 80px;
+					margin-bottom: -50px;
+					border-radius: 4px;
+				}
+				.msg-success {
+					color: #0f5132;
+					background-color: #d1e7dd;
+					border: 1px solid #badbcc;
+				}
+				.msg-error {
+					color: #842029;
+					background-color: #f8d7da;
+					border: #f5c2c7;
 				}
 				.editor-container {
 					margin-top: 0;
@@ -260,7 +282,10 @@ class IniEditor
 					font-size: 1.75em;
 					font-weight: bold;
 				}
-				.editor-container > form {
+				.add-section {
+					margin-top: 90px;
+				}
+				.editor-container > form.with-padding {
 					padding-top: 75px;
 				}
 				.save-button {
@@ -430,9 +455,8 @@ class IniEditor
 				}
 				
 				@media only screen and (max-width: 600px) {
-					.alert {
-						margin-left: 5px;
-						margin-right: 5px;
+					#msg {
+						margin-bottom: -60px;
 					}
 					
 					.editor-container {
@@ -498,7 +522,22 @@ class IniEditor
 			HEREDOC;
 	}
 	
-	// get script used to manage the button callback
+	// Get external resources (JavaScript and CSS from jQuery and Bootstrap CDN).
+	public static function getExternalResources()
+	{
+		return <<<'HEREDOC'
+			<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+			        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			        crossorigin="anonymous"></script>
+			
+			<link rel="stylesheet"
+			      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+			      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+			      crossorigin="anonymous" />
+			HEREDOC;
+	}
+	
+	// Get scripts.
 	public function getScripts()
 	{
 		if ($this->enable_edit) {
@@ -529,7 +568,7 @@ class IniEditor
 				</style>
 				
 				<script>
-					function base64_encode_url(value) {
+					function base64EncodeUrl(value) {
 						return btoa(value).replaceAll('+', '-').replaceAll('/', '_').replace(/\=+$/, '');
 					}
 					
@@ -555,8 +594,8 @@ class IniEditor
 								             '<div class="form-group vector">' +
 								               '<div>' +
 								                 '<input type="checkbox" ' +
-								                         'name="ini#' + base64_encode_url(section) +
-								                               '#' + base64_encode_url(name) +
+								                         'name="ini#' + base64EncodeUrl(section) +
+								                               '#' + base64EncodeUrl(name) +
 								                               '#' + type + '[]" /> ' +
 								                 '<a href="javascript:;" ' +
 								                     'onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())" ' +
@@ -589,9 +628,9 @@ class IniEditor
 								                   '</label>' +
 								                   '<textarea rows="1" ' +
 								                              'class="form-control" ' +
-								                              'name="ini#' + base64_encode_url(section) +
-								                                    '#' + base64_encode_url(name) +
-								                                    '#' + type + '[' + base64_encode_url(namekey) + ']">' +
+								                              'name="ini#' + base64EncodeUrl(section) +
+								                                    '#' + base64EncodeUrl(name) +
+								                                    '#' + type + '[' + base64EncodeUrl(namekey) + ']">' +
 								                   '</textarea>' +
 								                 '</div>' +
 								                 '<div class="col-md-2">' +
@@ -636,8 +675,8 @@ class IniEditor
 								           '</div>' +
 								           '<div class="col-md-8">' +
 								             '<input type="checkbox" ' +
-								                     'name="ini#' + base64_encode_url(section) +
-								                           '#' + base64_encode_url(name) +
+								                     'name="ini#' + base64EncodeUrl(section) +
+								                           '#' + base64EncodeUrl(name) +
 								                           '#' + type + '" />' +
 								           '</div>';
 							} else {
@@ -651,8 +690,8 @@ class IniEditor
 								           '<div class="col-md-8">' +
 								             '<textarea rows="1" ' +
 								                        'class="form-control" ' +
-								                        'name="ini#' + base64_encode_url(section) +
-								                              '#' + base64_encode_url(name) +
+								                        'name="ini#' + base64EncodeUrl(section) +
+								                              '#' + base64EncodeUrl(name) +
 								                              '#' + type + '">' +
 								             '</textarea>' +
 								           '</div>';
@@ -693,9 +732,9 @@ class IniEditor
 						               '</label>' +
 						               '<textarea rows="1" ' +
 						                          'class="form-control" ' +
-						                          'name="ini#' + base64_encode_url(section) +
-						                                '#' + base64_encode_url(name) +
-						                                '#' + type + '[' + base64_encode_url(namekey) + ']">' +
+						                          'name="ini#' + base64EncodeUrl(section) +
+						                                '#' + base64EncodeUrl(name) +
+						                                '#' + type + '[' + base64EncodeUrl(namekey) + ']">' +
 						               '</textarea>' +
 						             '</div>';
 						
@@ -785,6 +824,10 @@ class IniEditor
 							this.style.height = 'auto';
 							this.style.height = (this.scrollHeight) + 'px';
 						});
+						
+						if (window.location.hash.substr(1) == 'msg') {
+							window.scrollTo({top: 0, behavior: 'smooth'});
+						}
 					});
 				</script>
 				HEREDOC;
@@ -799,7 +842,7 @@ class IniEditor
 		}
 	}
 	
-	// get the form from the file
+	// Get the HTML code for the form.
 	public function getForm()
 	{
 		$html = '<div class="editor-container">';
@@ -813,7 +856,12 @@ class IniEditor
 		         '</div>';
 		
 		if ($this->enable_add && $this->enable_edit) {
-			$html .= '<span><a href="javascript:;" class="btn btn-primary" onclick="addSection(this);">Add section</a></span>';
+			$html .= '<div class="add-section">' .
+			         '<a href="javascript:;" class="btn btn-primary" onclick="addSection(this);">Add section</a>' .
+			         '</div>';
+			$form_class = '';
+		} else {
+			$form_class = 'with-padding';
 		}
 		
 		if (!is_writeable($this->ini_file)) {
@@ -821,11 +869,12 @@ class IniEditor
 		}
 		
 		$conf = parse_ini_file($this->ini_file, true, $this->scanner_mode);
+		$input_ini_file = static::base64EncodeUrl($this->ini_file);
 		
 		$html .= <<<HEREDOC
-			<form method="post" action="#top">
+			<form class="$form_class" method="post" action="#msg">
 				<input type="hidden" name="save_ini_form" value="1" />
-				<input type="hidden" name="ini_file" value="{$this->ini_file}" />
+				<input type="hidden" name="ini_file" value="$input_ini_file" />
 			HEREDOC;
 		
 		if ($this->enable_edit) {
@@ -867,7 +916,7 @@ class IniEditor
 			$html .= '<div class="config-container container">' . "\n";
 			
 			foreach ($cv as $label => $val) {
-				$val = IniEditor::format_value($val);
+				$val = static::formatValue($val);
 				
 				$html .= '<div class="form-group row">';
 				
@@ -892,8 +941,8 @@ class IniEditor
 					$html .= "</div>";
 					$html .= '<div class="col-md-8">';
 					
-					$c_base64_url = IniEditor::base64_encode_url($c);
-					$label_base64_url = IniEditor::base64_encode_url($label);
+					$c_base64_url = static::base64EncodeUrl($c);
+					$label_base64_url = static::base64EncodeUrl($label);
 					
 					if (
 						(isset($c[$label]) && is_bool($c[$label])) ||
@@ -934,7 +983,7 @@ class IniEditor
 					$html .= '<div class="form-group vector">';
 					
 					foreach ($val as $k => $v) {
-						$v = IniEditor::format_value($v);
+						$v = static::formatValue($v);
 						
 						if (!is_numeric($k)) {
 							$html .= '<div class="with-array-key">';
@@ -945,8 +994,8 @@ class IniEditor
 							$html .= '<div class="col-md-10">';
 						}
 						
-						$c_base64_url = IniEditor::base64_encode_url($c);
-						$label_base64_url = IniEditor::base64_encode_url($label);
+						$c_base64_url = static::base64EncodeUrl($c);
+						$label_base64_url = static::base64EncodeUrl($label);
 						
 						if (
 							is_bool($val[$k]) ||
@@ -958,7 +1007,7 @@ class IniEditor
 							$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool[]' value='1'" .
 							         ($v ? ' checked="checked"' : "") . " />";
 						} else {
-							$k_base64_url = IniEditor::base64_encode_url($k);
+							$k_base64_url = static::base64EncodeUrl($k);
 							
 							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>" .
 							         str_replace('\\"', '"', $v) .
@@ -1017,7 +1066,7 @@ class IniEditor
 		return $html;
 	}
 	
-	// print the form from the file
+	// Print the form.
 	public function printForm()
 	{
 		echo $this->getForm();

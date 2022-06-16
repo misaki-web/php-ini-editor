@@ -8,37 +8,37 @@
 		<title>PHP INI Editor Demo</title>
 		
 		<?php
-			// include the class
+			// Include the class.
 			include('../IniEditor.class.php');
 			
-			// include Javascript and CSS from jQuery and Bootstrap CDN
-			echo IniEditor::getCssJsInclude();
-			
-			// include class CSS (use your own if you prefer)
-			echo IniEditor::getCSS();
-			
-			// initialize the class object
+			// Initialize the class object.
 			$ini_editor = new IniEditor();
 			
-			// set folder where to put backups before saving the new version of the file (folder needs write permissions)
-			$ini_editor->setBackupFolder('backups');
+			// Set the backup folder where to create a backup before saving the new version. Default is "backup".
+			$ini_editor->setBackupFolder('backup-folder');
 			
-			// set different Scanner Mode (optional)
-			$ini_editor->setScannerMode(INI_SCANNER_TYPED);
-			
-			// set the path of the file you want to edit or view
+			// Set the path to the INI file.
 			$ini_editor->setIniFile('demo.ini');
 			
-			// set to true to allow edit of the config file (default is true)
+			// Set to true to allow editing the INI file. Default is true.
 			$ini_editor->enableEdit(true);
 			
-			// set to true to allow add of sections and conf in the config file (default is true)
+			// Set to true to allow adding conf and sections in the INI file. Default is true.
 			$ini_editor->enableAdd(true);
 			
-			// set to true to allow delete of conf in the config file (default is true)
+			// set to true to allow deleting conf in the INI file. Default is true.
 			$ini_editor->enableDelete(true);
 			
-			// get scripts
+			// Set the scanner mode when parsing the INI file (optional). Default is INI_SCANNER_TYPED.
+			$ini_editor->setScannerMode(INI_SCANNER_TYPED);
+			
+			// Include external resources (JavaScript and CSS from jQuery and Bootstrap CDN).
+			echo IniEditor::getExternalResources();
+			
+			// Include CSS style.
+			echo IniEditor::getCSS();
+			
+			// Get scripts.
 			echo $ini_editor->getScripts();
 		?>
 	</head>
@@ -46,8 +46,11 @@
 		<div class="scroll go-to-bottom"><a href="#bottom"> ⇓ </a></div>
 		
 		<?php
-			// print the form. Use $ini_editor->getForm() to store it in a variable
+			// Print the form.
 			$ini_editor->printForm();
+			
+			// Note: use "$ini_editor->getForm()" to store it in a variable. Example:
+			// $form = $ini_editor->getForm();
 		?>
 		
 		<div class="scroll go-to-top"><a href="#top"> ⇑ </a></div>
