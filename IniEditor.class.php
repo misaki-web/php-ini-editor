@@ -869,157 +869,64 @@ class IniEditor
 		}
 		
 		$conf = parse_ini_file($this->ini_file, true, $this->scanner_mode);
-		$input_ini_file = static::base64EncodeUrl($this->ini_file);
 		
-		$html .= <<<HEREDOC
-			<form class="$form_class" method="post" action="#msg">
-				<input type="hidden" name="save_ini_form" value="1" />
-				<input type="hidden" name="ini_file" value="$input_ini_file" />
-			HEREDOC;
-		
-		if ($this->enable_edit) {
-			$html .= <<<HEREDOC
-				<div class="save-button">
-					<input type="Submit" class="btn btn-success" value="Save" />
-				</div>
-				HEREDOC;
-		}
-		
-		$additional = [];
-		
-		foreach ($conf as $c => $cv) {
-			if (in_array("id", array_keys($cv))) {
-				$conf[$c] = array_merge($additional, $cv);
-			}
-		}
-		
-		foreach ($conf as $c => $cv) {
-			$html .= "<fieldset><legend>\n";
-			$html .= '<span class="section" onclick="$(this).parent().next().slideToggle();">' . "$c</span>";
+		if (is_array($conf)) {
+			$input_ini_file = static::base64EncodeUrl($this->ini_file);
 			
-			if ($this->enable_add && $this->enable_edit) {
-				$html .= <<<'HEREDOC'
-					<span class="btns"><a href="javascript:;"
-					         class="btn btn-info"
-					         onclick="addRow(this, 'text');">Add text config</a> 
-					      <a class="btn btn-info"
-					         href="javascript:;"
-					         onclick="addRow(this, 'bool');">Add Bool config</a> 
-					      <a class="btn btn-info"
-					         href="javascript:;"
-					         onclick="addRow(this, 'text', 'array');">Add Array config</a></span>
-					
+			$html .= <<<HEREDOC
+				<form class="$form_class" method="post" action="#msg">
+					<input type="hidden" name="save_ini_form" value="1" />
+					<input type="hidden" name="ini_file" value="$input_ini_file" />
+				HEREDOC;
+			
+			if ($this->enable_edit) {
+				$html .= <<<HEREDOC
+					<div class="save-button">
+						<input type="Submit" class="btn btn-success" value="Save" />
+					</div>
 					HEREDOC;
 			}
 			
-			$html .= "</legend>\n";
-			$html .= '<div class="config-container container">' . "\n";
+			$additional = [];
 			
-			foreach ($cv as $label => $val) {
-				$val = static::formatValue($val);
+			foreach ($conf as $c => $cv) {
+				if (in_array("id", array_keys($cv))) {
+					$conf[$c] = array_merge($additional, $cv);
+				}
+			}
+			
+			foreach ($conf as $c => $cv) {
+				$html .= "<fieldset><legend>\n";
+				$html .= '<span class="section" onclick="$(this).parent().next().slideToggle();">' . "$c</span>";
 				
-				$html .= '<div class="form-group row">';
+				if ($this->enable_add && $this->enable_edit) {
+					$html .= <<<'HEREDOC'
+						<span class="btns"><a href="javascript:;"
+						         class="btn btn-info"
+						         onclick="addRow(this, 'text');">Add text config</a> 
+						      <a class="btn btn-info"
+						         href="javascript:;"
+						         onclick="addRow(this, 'bool');">Add Bool config</a> 
+						      <a class="btn btn-info"
+						         href="javascript:;"
+						         onclick="addRow(this, 'text', 'array');">Add Array config</a></span>
+						
+						HEREDOC;
+				}
 				
-				if (!is_array($val)) {
-					$html .= '<div class="col-md-4">';
+				$html .= "</legend>\n";
+				$html .= '<div class="config-container container">' . "\n";
+				
+				foreach ($cv as $label => $val) {
+					$val = static::formatValue($val);
 					
-					if ($this->enable_edit) {
-						$html .= <<<'HEREDOC'
-							<a href="javascript:;"
-							   onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())"
-							   class="down-arr">&darr;</a><a href="javascript:;"
-							   onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())"
-							   class="up-arr">&uarr;</a>
-							HEREDOC;
-						
-						if ($this->enable_delete) {
-							$html .= '<a href="javascript:;" class="remove-btn" onclick="$(this).parents(\'.form-group\').remove();">×</a>';
-						}
-					}
+					$html .= '<div class="form-group row">';
 					
-					$html .= '<label class="col-form-label"><input type="text" class="move-input" size="1"/><span>' . "$label</span></label>";
-					$html .= "</div>";
-					$html .= '<div class="col-md-8">';
-					
-					$c_base64_url = static::base64EncodeUrl($c);
-					$label_base64_url = static::base64EncodeUrl($label);
-					
-					if (
-						(isset($c[$label]) && is_bool($c[$label])) ||
-						$val == "1" ||
-						$val === true || $val === false ||
-						(!$val && $val != "")
-					) {
-						$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool' value='0' />";
-						$html .= "<input type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool' value='1'" .
-						         ($val ? ' checked="checked"' : "") . " />";
-					} else {
-						$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>" .
-						         str_replace('\\"', '"', $val) .
-						         "</textarea>";
-					}
-					
-					$html .= "</div>";
-				} else {
-					$html .= '<div class="col-md-4">';
-					
-					if ($this->enable_edit) {
-						$html .= <<<'HEREDOC'
-							<a href="javascript:;"
-							   onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())"
-							   class="down-arr">&darr;</a><a href="javascript:;"
-							   onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())"
-							   class="up-arr">&uarr;</a>
-							HEREDOC;
-						
-						if ($this->enable_delete) {
-							$html .= '<a class="remove-btn" href="javascript:;" onclick="$(this).parents(\'.form-group\').remove();">×</a>';
-						}
-					}
-					
-					$html .= '<label class="col-form-label is-array"><input type="text" class="move-input" size="1" /><span>' . "$label</span></label>";
-					$html .= "</div>";
-					$html .= '<div class="col-md-8">';
-					$html .= '<div class="form-group vector">';
-					
-					foreach ($val as $k => $v) {
-						$v = static::formatValue($v);
-						
-						if (!is_numeric($k)) {
-							$html .= '<div class="with-array-key">';
-							$html .= '<div class="col-md-10">';
-							$html .= "<label class='array_key'>$k</label>";
-						} else {
-							$html .= "<div>";
-							$html .= '<div class="col-md-10">';
-						}
-						
-						$c_base64_url = static::base64EncodeUrl($c);
-						$label_base64_url = static::base64EncodeUrl($label);
-						
-						if (
-							is_bool($val[$k]) ||
-							$v == "1" ||
-							$v === true || $v === false ||
-							!$v
-						) {
-							$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool[]' />";
-							$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool[]' value='1'" .
-							         ($v ? ' checked="checked"' : "") . " />";
-						} else {
-							$k_base64_url = static::base64EncodeUrl($k);
-							
-							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>" .
-							         str_replace('\\"', '"', $v) .
-							         "</textarea>";
-						}
-						
-						$html .= "</div>";
-						$html .= '<div class="col-md-2">';
+					if (!is_array($val)) {
+						$html .= '<div class="col-md-4">';
 						
 						if ($this->enable_edit) {
-							$html .= " ";
-							$html .= <<< 'HEREDOC'
+							$html .= <<<'HEREDOC'
 								<a href="javascript:;"
 								   onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())"
 								   class="down-arr">&darr;</a><a href="javascript:;"
@@ -1028,36 +935,132 @@ class IniEditor
 								HEREDOC;
 							
 							if ($this->enable_delete) {
-								$html .= '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>';
+								$html .= '<a href="javascript:;" class="remove-btn" onclick="$(this).parents(\'.form-group\').remove();">×</a>';
 							}
 						}
 						
+						$html .= '<label class="col-form-label"><input type="text" class="move-input" size="1"/><span>' . "$label</span></label>";
 						$html .= "</div>";
+						$html .= '<div class="col-md-8">';
+						
+						$c_base64_url = static::base64EncodeUrl($c);
+						$label_base64_url = static::base64EncodeUrl($label);
+						
+						if (
+							(isset($c[$label]) && is_bool($c[$label])) ||
+							$val == "1" ||
+							$val === true || $val === false ||
+							(!$val && $val != "")
+						) {
+							$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool' value='0' />";
+							$html .= "<input type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool' value='1'" .
+							         ($val ? ' checked="checked"' : "") . " />";
+						} else {
+							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>" .
+							         str_replace('\\"', '"', $val) .
+							         "</textarea>";
+						}
+						
+						$html .= "</div>";
+					} else {
+						$html .= '<div class="col-md-4">';
+						
+						if ($this->enable_edit) {
+							$html .= <<<'HEREDOC'
+								<a href="javascript:;"
+								   onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())"
+								   class="down-arr">&darr;</a><a href="javascript:;"
+								   onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())"
+								   class="up-arr">&uarr;</a>
+								HEREDOC;
+							
+							if ($this->enable_delete) {
+								$html .= '<a class="remove-btn" href="javascript:;" onclick="$(this).parents(\'.form-group\').remove();">×</a>';
+							}
+						}
+						
+						$html .= '<label class="col-form-label is-array"><input type="text" class="move-input" size="1" /><span>' . "$label</span></label>";
+						$html .= "</div>";
+						$html .= '<div class="col-md-8">';
+						$html .= '<div class="form-group vector">';
+						
+						foreach ($val as $k => $v) {
+							$v = static::formatValue($v);
+							
+							if (!is_numeric($k)) {
+								$html .= '<div class="with-array-key">';
+								$html .= '<div class="col-md-10">';
+								$html .= "<label class='array_key'>$k</label>";
+							} else {
+								$html .= "<div>";
+								$html .= '<div class="col-md-10">';
+							}
+							
+							$c_base64_url = static::base64EncodeUrl($c);
+							$label_base64_url = static::base64EncodeUrl($label);
+							
+							if (
+								is_bool($val[$k]) ||
+								$v == "1" ||
+								$v === true || $v === false ||
+								!$v
+							) {
+								$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool[]' />";
+								$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool[]' value='1'" .
+								         ($v ? ' checked="checked"' : "") . " />";
+							} else {
+								$k_base64_url = static::base64EncodeUrl($k);
+								
+								$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>" .
+								         str_replace('\\"', '"', $v) .
+								         "</textarea>";
+							}
+							
+							$html .= "</div>";
+							$html .= '<div class="col-md-2">';
+							
+							if ($this->enable_edit) {
+								$html .= " ";
+								$html .= <<< 'HEREDOC'
+									<a href="javascript:;"
+									   onclick="$(this).parent().parent().insertAfter($(this).parent().parent().next())"
+									   class="down-arr">&darr;</a><a href="javascript:;"
+									   onclick="$(this).parent().parent().insertBefore($(this).parent().parent().prev())"
+									   class="up-arr">&uarr;</a>
+									HEREDOC;
+								
+								if ($this->enable_delete) {
+									$html .= '<a href="javascript:;" class="remove-btn" onclick="$(this).parent().parent().remove();">×</a>';
+								}
+							}
+							
+							$html .= "</div>";
+							$html .= "</div>";
+						}
+						
+						$html .= "</div>";
+						
+						if ($this->enable_add && $this->enable_edit) {
+							$html .= <<<'HEREDOC'
+								<table class="array_add_value">
+									<tr>
+										<td class="center">
+											<a href="javascript:;" class="btn btn-info" onclick="javascript:addArrayRow(this, 'text');">Add value</a>
+										</td>
+									</tr>
+								</table>
+								HEREDOC;
+						}
+						
 						$html .= "</div>";
 					}
 					
-					$html .= "</div>";
-					
-					if ($this->enable_add && $this->enable_edit) {
-						$html .= <<<'HEREDOC'
-							<table class="array_add_value">
-								<tr>
-									<td class="center">
-										<a href="javascript:;" class="btn btn-info" onclick="javascript:addArrayRow(this, 'text');">Add value</a>
-									</td>
-								</tr>
-							</table>
-							HEREDOC;
-					}
-					
-					$html .= "</div>";
+					$html .= "</div>\n";
 				}
 				
-				$html .= "</div>\n";
+				$html .= "</div>";
+				$html .= "</fieldset>\n";
 			}
-			
-			$html .= "</div>";
-			$html .= "</fieldset>\n";
 		}
 		
 		$html .= "</form>";
