@@ -32,6 +32,11 @@
 			// Set the scanner mode when parsing the INI file (optional). Default is INI_SCANNER_TYPED.
 			$ini_editor->setScannerMode(INI_SCANNER_TYPED);
 			
+			// Set documentation to be displayed when clicked.
+			// The first argument is the path to the documentation content.
+			// The second argument is the documentation format ("html", "ini" or "text").
+			$ini_editor->setDocumentation('demo.template.ini', 'ini');
+			
 			// Include external resources (JavaScript and CSS from jQuery and Bootstrap CDN).
 			echo IniEditor::getExternalResources();
 			

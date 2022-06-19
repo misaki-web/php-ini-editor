@@ -20,6 +20,8 @@ class IniEditor
 {
 	protected $ini_file = '';
 	protected $backup_folder = 'backup';
+	protected $doc_path = '';
+	protected $doc_format = 'text';
 	protected $enable_edit = true;
 	protected $enable_add = true;
 	protected $enable_delete = true;
@@ -228,6 +230,18 @@ class IniEditor
 		$this->scanner_mode = $mode;
 	}
 	
+	// Set documentation to be displayed when clicked.
+	// The first argument is the path to the documentation content.
+	// The second argument is the documentation format ("html", "ini" or "text").
+	public function setDocumentation($doc_path, $doc_format)
+	{
+		$this->doc_path = $doc_path;
+		
+		if ($doc_format == 'html' || $doc_format == 'ini' || $doc_format == 'text') {
+			$this->doc_format = $doc_format;
+		}
+	}
+	
 	// Get CSS style.
 	public static function getCSS()
 	{
@@ -301,8 +315,32 @@ class IniEditor
 					font-size: 1.75em;
 					font-weight: bold;
 				}
-				.add-section {
+				.global-actions {
 					margin-top: 95px;
+				}
+				.global-actions .btn {
+					margin-right: 5px;
+				}
+				.doc-content {
+					max-height:400px;
+					overflow-y: auto;
+					margin-top: 20px;
+					background-color: #f2f2f2;
+					box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+					border-radius: 4px;
+					font-family: monospace;
+				}
+				.doc-content .comment {
+					color: #1d1dfd;
+				}
+				.doc-content .section {
+					color: #a52a2a;
+				}
+				.doc-content .property {
+					color: #2e8b57;
+				}
+				.hide {
+					display: none;
 				}
 				.editor-container > form.with-padding {
 					padding-top: 75px;
@@ -837,6 +875,14 @@ class IniEditor
 						});
 					});
 					
+					function toggleDisplay(selector) {
+						if ($(selector).hasClass('hide')) {
+							$(selector).removeClass('hide');
+						} else {
+							$(selector).addClass('hide');
+						}
+					}
+					
 					$(document).ready(function() {
 						$('textarea').each(function() {
 							this.setAttribute('style', 'height: ' + (this.scrollHeight) + 'px; overflow-y: hidden;');
@@ -849,7 +895,7 @@ class IniEditor
 						var add_section_height = title_height + 5;
 						
 						$('.save-button .btn-success').css({'height': title_height + 'px'});
-						$('.add-section, #msg').css({'margin-top': add_section_height + 'px'});
+						$('.global-actions, #msg').css({'margin-top': add_section_height + 'px'});
 						
 						if (window.location.hash.substr(1) == 'msg') {
 							window.scrollTo({top: 0, behavior: 'smooth'});
@@ -877,17 +923,57 @@ class IniEditor
 			$html .= $this->saveForm();
 		}
 		
-		$html .= '<div class="title-container">' .
-		         '<h3><span class="title-label">Updating the file</span> <span class="filename">"' . $this->ini_file . '"</span></h3>' .
-		         '</div>';
+		$html .= <<<HEREDOC
+			<div class="title-container">
+				<h3><span class="title-label">Updating the file</span> <span class="filename">"{$this->ini_file}"</span></h3>
+			</div>
+			HEREDOC;
+		
+		$ga_doc = '';
+		$ga_add_section = '';
 		
 		if ($this->enable_add && $this->enable_edit) {
-			$html .= '<div class="add-section">' .
-			         '<a href="javascript:;" class="btn btn-primary" onclick="addSection(this);">Add section</a>' .
-			         '</div>';
+			$ga_add_section = '<a class="btn btn-primary add-section" href="javascript:;" onclick="addSection(this);">Add section</a>';
 			$form_class = '';
 		} else {
 			$form_class = 'with-padding';
+		}
+		
+		if (file_exists($this->doc_path)) {
+			$doc_content = file_get_contents($this->doc_path);
+			
+			if ($doc_content !== false) {
+				if ($this->doc_format == 'ini' || $this->doc_format == 'text') {
+					$doc_content = htmlspecialchars($doc_content);
+					
+					if ($this->doc_format == 'ini') {
+						$doc_content = preg_replace('/^(;.*)$/m', '<span class="comment">$1</span>', $doc_content);
+						$doc_content = preg_replace('/^(\[[^\]]+\])$/m', '<span class="section">$1</span>', $doc_content);
+						$doc_content = preg_replace('/^([a-z][^= \[]*)/m', '<span class="property">$1</span>', $doc_content);
+					}
+					
+					$doc_content = str_replace("\n", '<br />', $doc_content);
+				}
+				
+				$ga_doc = <<<HEREDOC
+					<a class="btn btn-primary" href="javascript:;" onclick="toggleDisplay('.doc-content');">Help</a>
+					<div class="doc-content hide">$doc_content</div>
+					HEREDOC;
+			}
+		}
+		
+		if ($ga_doc !== '' || $ga_add_section !== '') {
+			$html .= '<div class="global-actions">';
+			
+			if ($ga_add_section !== '') {
+				$html .= $ga_add_section;
+			}
+			
+			if ($ga_doc !== '') {
+				$html .= $ga_doc;
+			}
+			
+			$html .= '</div>';
 		}
 		
 		if (!is_writeable($this->ini_file)) {
@@ -922,8 +1008,10 @@ class IniEditor
 			}
 			
 			foreach ($conf as $c => $cv) {
-				$html .= "<fieldset><legend>\n";
-				$html .= '<span class="section" onclick="$(this).parent().next().slideToggle();">' . "$c</span>";
+				$html .= <<<HEREDOC
+					<fieldset><legend>
+						<span class="section" onclick="$(this).parent().next().slideToggle();">$c</span>
+					HEREDOC;
 				
 				if ($this->enable_add && $this->enable_edit) {
 					$html .= <<<'HEREDOC'
@@ -940,8 +1028,10 @@ class IniEditor
 						HEREDOC;
 				}
 				
-				$html .= "</legend>\n";
-				$html .= '<div class="config-container container">' . "\n";
+				$html .= <<<HEREDOC
+						</legend>
+					<div class="config-container container">
+					HEREDOC;
 				
 				foreach ($cv as $label => $val) {
 					$val = static::formatValue($val);
@@ -965,9 +1055,14 @@ class IniEditor
 							}
 						}
 						
-						$html .= '<label class="col-form-label"><input type="text" class="move-input" size="1"/><span>' . "$label</span></label>";
-						$html .= "</div>";
-						$html .= '<div class="col-md-8">';
+						$html .= <<<HEREDOC
+								<label class="col-form-label">
+									<input type="text" class="move-input" size="1"/>
+									<span>$label</span>
+								</label>
+							</div>
+							<div class="col-md-8">
+							HEREDOC;
 						
 						$c_base64_url = static::base64EncodeUrl($c);
 						$label_base64_url = static::base64EncodeUrl($label);
@@ -978,13 +1073,18 @@ class IniEditor
 							$val === true || $val === false ||
 							(!$val && $val != "")
 						) {
-							$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool' value='0' />";
-							$html .= "<input type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool' value='1'" .
-							         ($val ? ' checked="checked"' : "") . " />";
+							$checked = $val ? ' checked="checked"' : "";
+							$html .= <<<HEREDOC
+								<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool' value='0' />
+								<input type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool' value='1'$checked />
+								HEREDOC;
 						} else {
-							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>" .
-							         str_replace('\\"', '"', $val) .
-							         "</textarea>";
+							$textarea_content = str_replace('\\"', '"', $val);
+							$html .= <<<HEREDOC
+								<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>
+									$textarea_content
+								</textarea>
+								HEREDOC;
 						}
 						
 						$html .= "</div>";
@@ -1005,21 +1105,30 @@ class IniEditor
 							}
 						}
 						
-						$html .= '<label class="col-form-label is-array"><input type="text" class="move-input" size="1" /><span>' . "$label</span></label>";
-						$html .= "</div>";
-						$html .= '<div class="col-md-8">';
-						$html .= '<div class="form-group vector">';
+						$html .= <<<HEREDOC
+								<label class="col-form-label is-array">
+									<input type="text" class="move-input" size="1" />
+									<span>$label</span>
+								</label>
+							</div>
+							<div class="col-md-8">
+								<div class="form-group vector">
+							HEREDOC;
 						
 						foreach ($val as $k => $v) {
 							$v = static::formatValue($v);
 							
 							if (!is_numeric($k)) {
-								$html .= '<div class="with-array-key">';
-								$html .= '<div class="col-md-10">';
-								$html .= "<label class='array_key'>$k</label>";
+								$html .= <<<HEREDOC
+									<div class="with-array-key">
+										<div class="col-md-10">
+											<label class='array_key'>$k</label>
+									HEREDOC;
 							} else {
-								$html .= "<div>";
-								$html .= '<div class="col-md-10">';
+								$html .= <<<HEREDOC
+									<div>
+										<div class="col-md-10">
+									HEREDOC;
 							}
 							
 							$c_base64_url = static::base64EncodeUrl($c);
@@ -1031,19 +1140,25 @@ class IniEditor
 								$v === true || $v === false ||
 								!$v
 							) {
-								$html .= "<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool[]' />";
-								$html .= "<input class='form_checkbox' type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool[]' value='1'" .
-								         ($v ? ' checked="checked"' : "") . " />";
+								$checked = ($v ? ' checked="checked"' : "");
+								$html .= <<<HEREDOC
+									<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool[]' />
+									<input class='form_checkbox' type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool[]' value='1'$checked />
+									HEREDOC;
 							} else {
 								$k_base64_url = static::base64EncodeUrl($k);
-								
-								$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>" .
-								         str_replace('\\"', '"', $v) .
-								         "</textarea>";
+								$textarea_content = str_replace('\\"', '"', $v);
+								$html .= <<<HEREDOC
+									<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>
+										$textarea_content
+									</textarea>
+									HEREDOC;
 							}
 							
-							$html .= "</div>";
-							$html .= '<div class="col-md-2">';
+							$html .= <<<HEREDOC
+								</div>
+								<div class="col-md-2">
+								HEREDOC;
 							
 							if ($this->enable_edit) {
 								$html .= " ";
@@ -1060,8 +1175,10 @@ class IniEditor
 								}
 							}
 							
-							$html .= "</div>";
-							$html .= "</div>";
+							$html .= <<<HEREDOC
+									</div>
+								</div>
+								HEREDOC;
 						}
 						
 						$html .= "</div>";
@@ -1084,13 +1201,17 @@ class IniEditor
 					$html .= "</div>\n";
 				}
 				
-				$html .= "</div>";
-				$html .= "</fieldset>\n";
+				$html .= <<<HEREDOC
+						</div>
+					</fieldset>
+					HEREDOC;
 			}
 		}
 		
-		$html .= "</form>";
-		$html .= "</div>";
+		$html .= <<<HEREDOC
+				</form>
+			</div>
+			HEREDOC;
 		
 		return $html;
 	}
