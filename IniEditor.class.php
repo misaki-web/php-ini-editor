@@ -342,9 +342,6 @@ class IniEditor
 				.hide {
 					display: none;
 				}
-				.editor-container > form.with-padding {
-					padding-top: 75px;
-				}
 				.save-button {
 					width: 100%;
 					padding: 0;
@@ -927,16 +924,11 @@ class IniEditor
 			<div class="title-container">
 				<h3><span class="title-label">Updating the file</span> <span class="filename">"{$this->ini_file}"</span></h3>
 			</div>
+			<div class="global-actions">
 			HEREDOC;
 		
-		$ga_doc = '';
-		$ga_add_section = '';
-		
 		if ($this->enable_add && $this->enable_edit) {
-			$ga_add_section = '<a class="btn btn-primary add-section" href="javascript:;" onclick="addSection(this);">Add section</a>';
-			$form_class = '';
-		} else {
-			$form_class = 'with-padding';
+			$html .= '<a class="btn btn-primary add-section" href="javascript:;" onclick="addSection(this);">Add section</a>';
 		}
 		
 		if (file_exists($this->doc_path)) {
@@ -955,26 +947,14 @@ class IniEditor
 					$doc_content = str_replace("\n", '<br />', $doc_content);
 				}
 				
-				$ga_doc = <<<HEREDOC
+				$html .= <<<HEREDOC
 					<a class="btn btn-primary" href="javascript:;" onclick="toggleDisplay('.doc-content');">Help</a>
 					<div class="doc-content hide">$doc_content</div>
 					HEREDOC;
 			}
 		}
 		
-		if ($ga_doc !== '' || $ga_add_section !== '') {
-			$html .= '<div class="global-actions">';
-			
-			if ($ga_add_section !== '') {
-				$html .= $ga_add_section;
-			}
-			
-			if ($ga_doc !== '') {
-				$html .= $ga_doc;
-			}
-			
-			$html .= '</div>';
-		}
+		$html .= '</div>';
 		
 		if (!is_writeable($this->ini_file)) {
 			$html .= '<h4 style="color:red;">' . $this->ini_file . " is not writable</h4>";
@@ -986,7 +966,7 @@ class IniEditor
 			$input_ini_file = static::base64EncodeUrl($this->ini_file);
 			
 			$html .= <<<HEREDOC
-				<form class="$form_class" method="post" action="#msg">
+				<form method="post" action="#msg">
 					<input type="hidden" name="save_ini_form" value="1" />
 					<input type="hidden" name="ini_file" value="$input_ini_file" />
 				HEREDOC;
