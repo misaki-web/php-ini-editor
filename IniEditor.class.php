@@ -316,7 +316,7 @@ class IniEditor
 					font-weight: bold;
 				}
 				.global-actions {
-					margin-top: 95px;
+					padding-top: 95px;
 				}
 				.global-actions .btn {
 					margin-right: 5px;
@@ -892,7 +892,7 @@ class IniEditor
 						var add_section_height = title_height + 5;
 						
 						$('.save-button .btn-success').css({'height': title_height + 'px'});
-						$('.global-actions, #msg').css({'margin-top': add_section_height + 'px'});
+						$('.global-actions, #msg').css({'padding-top': add_section_height + 'px'});
 						
 						if (window.location.hash.substr(1) == 'msg') {
 							window.scrollTo({top: 0, behavior: 'smooth'});
