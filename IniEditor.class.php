@@ -125,12 +125,31 @@ class IniEditor
 				}
 			}
 			
-			$content = "";
+			$content = '';
 			
-			foreach ($save as $section => $rows) {
+			foreach ($save as $section => $rows_array) {
+				if ($content !== '') {
+					$content .= "\n";
+				}
+				
 				$content .= "[$section]\n";
-				$content .= implode("\n", $rows);
-				$content .= "\n\n";
+				$previous_property = '';
+				
+				foreach ($rows_array as $row) {
+					$property = '';
+					preg_match('/^([^ =\[]+)/', $row, $matches, PREG_UNMATCHED_AS_NULL);
+					
+					if (isset($matches[1]) && $matches[1] !== null) {
+						$property = $matches[1];
+					}
+					
+					if ($property != $previous_property) {
+						$content .= "\n";
+					}
+					
+					$content .= "$row\n";
+					$previous_property = $property;
+				}
 			}
 			
 			$res = file_put_contents($this->ini_file, $content);
@@ -226,7 +245,7 @@ class IniEditor
 					margin-right: auto;
 				}
 				#msg {
-					margin-top: 80px;
+					margin-top: 95px;
 					margin-bottom: -50px;
 					border-radius: 4px;
 				}
@@ -263,7 +282,7 @@ class IniEditor
 				.title-container,
 				.save-button {
 					position: fixed;
-					top: 0;
+					top: 10px;
 				}
 				.title-container {
 					display: flex;
@@ -273,7 +292,7 @@ class IniEditor
 					padding: 10px 0 10px 5px;
 					background-color: #f2f2f2;
 					box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
-					border-radius: 0 0 4px 4px;
+					border-radius: 4px;
 				}
 				.title-container h3 {
 					margin-top: 0;
@@ -283,21 +302,22 @@ class IniEditor
 					font-weight: bold;
 				}
 				.add-section {
-					margin-top: 90px;
+					margin-top: 105px;
 				}
 				.editor-container > form.with-padding {
 					padding-top: 75px;
 				}
 				.save-button {
 					width: 100%;
-					padding: 10px 5px 10px 0;
+					padding: 0;
 				}
 				input.btn.btn-success {
 					display: block;
 					width: 150px;
-					height: 50px;
+					min-height: 50px;
 					margin-left: auto;
 					padding: 10px;
+					border-radius: 0 4px 4px 0;
 					font-size: 1.2rem;
 					font-weight: bold;
 				}
@@ -824,6 +844,12 @@ class IniEditor
 							this.style.height = 'auto';
 							this.style.height = (this.scrollHeight) + 'px';
 						});
+						
+						var title_height = $('.title-container').innerHeight();
+						var add_section_height = title_height + 15;
+						
+						$('.save-button .btn-success').css({'height': title_height + 'px'});
+						$('.add-section, #msg').css({'margin-top': add_section_height + 'px'});
 						
 						if (window.location.hash.substr(1) == 'msg') {
 							window.scrollTo({top: 0, behavior: 'smooth'});
