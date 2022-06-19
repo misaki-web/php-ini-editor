@@ -465,11 +465,11 @@ class IniEditor
 					margin-left: 10px;
 				}
 				.col-md-4 {
-					width: 25%;
+					width: 35%;
 					margin-top: 7px;
 				}
 				.col-md-8 {
-					width: 75%;
+					width: 65%;
 					margin-bottom: 10px;
 				}
 				.col-md-10 {
