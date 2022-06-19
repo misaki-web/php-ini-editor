@@ -1080,11 +1080,9 @@ class IniEditor
 								HEREDOC;
 						} else {
 							$textarea_content = str_replace('\\"', '"', $val);
-							$html .= <<<HEREDOC
-								<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>
-									$textarea_content
-								</textarea>
-								HEREDOC;
+							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>" .
+							           $textarea_content .
+							         "</textarea>";
 						}
 						
 						$html .= "</div>";
@@ -1148,11 +1146,9 @@ class IniEditor
 							} else {
 								$k_base64_url = static::base64EncodeUrl($k);
 								$textarea_content = str_replace('\\"', '"', $v);
-								$html .= <<<HEREDOC
-									<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>
-										$textarea_content
-									</textarea>
-									HEREDOC;
+								$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>" .
+								           $textarea_content .
+								         "</textarea>";
 							}
 							
 							$html .= <<<HEREDOC
