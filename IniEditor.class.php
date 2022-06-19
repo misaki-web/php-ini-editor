@@ -282,7 +282,7 @@ class IniEditor
 				.title-container,
 				.save-button {
 					position: fixed;
-					top: 10px;
+					top: 0;
 				}
 				.title-container {
 					display: flex;
@@ -292,7 +292,7 @@ class IniEditor
 					padding: 10px 0 10px 5px;
 					background-color: #f2f2f2;
 					box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
-					border-radius: 4px;
+					border-radius: 0 0 4px 4px;
 				}
 				.title-container h3 {
 					margin-top: 0;
@@ -302,7 +302,7 @@ class IniEditor
 					font-weight: bold;
 				}
 				.add-section {
-					margin-top: 105px;
+					margin-top: 95px;
 				}
 				.editor-container > form.with-padding {
 					padding-top: 75px;
@@ -317,7 +317,7 @@ class IniEditor
 					min-height: 50px;
 					margin-left: auto;
 					padding: 10px;
-					border-radius: 0 4px 4px 0;
+					border-radius: 0 0 4px 0;
 					font-size: 1.2rem;
 					font-weight: bold;
 				}
@@ -846,7 +846,7 @@ class IniEditor
 						});
 						
 						var title_height = $('.title-container').innerHeight();
-						var add_section_height = title_height + 15;
+						var add_section_height = title_height + 5;
 						
 						$('.save-button .btn-success').css({'height': title_height + 'px'});
 						$('.add-section, #msg').css({'margin-top': add_section_height + 'px'});
