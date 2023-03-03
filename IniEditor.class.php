@@ -39,11 +39,11 @@ class IniEditor
 	}
 	
 	private static function base64EncodeUrl($value) {
-		return rtrim(strtr(base64_encode($value), "+/", "-_"), "=");
+		return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
 	}
 	
 	private static function base64DecodeUrl($value) {
-		return base64_decode(str_pad(strtr($value, "-_", "+/"), strlen($value) % 4, "=", STR_PAD_RIGHT));
+		return base64_decode(str_pad(strtr($value, '-_', '+/'), strlen($value) % 4, '=', STR_PAD_RIGHT));
 	}
 	
 	private static function formatValue($value)
@@ -1044,8 +1044,8 @@ class IniEditor
 							<div class="col-md-8">
 							HEREDOC;
 						
-						$c_base64_url = static::base64EncodeUrl($c);
-						$label_base64_url = static::base64EncodeUrl($label);
+						$c_base64url = static::base64EncodeUrl($c);
+						$label_base64url = static::base64EncodeUrl($label);
 						
 						if (
 							(isset($c[$label]) && is_bool($c[$label])) ||
@@ -1055,12 +1055,12 @@ class IniEditor
 						) {
 							$checked = $val ? ' checked="checked"' : "";
 							$html .= <<<HEREDOC
-								<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool' value='0' />
-								<input type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool' value='1'$checked />
+								<input class='form_checkbox' type='hidden' name='ini#$c_base64url#$label_base64url#bool' value='0' />
+								<input type='checkbox' name='ini#$c_base64url#$label_base64url#bool' value='1'$checked />
 								HEREDOC;
 						} else {
 							$textarea_content = str_replace('\\"', '"', $val);
-							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text'>" .
+							$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64url#$label_base64url#text'>" .
 							           $textarea_content .
 							         "</textarea>";
 						}
@@ -1109,8 +1109,8 @@ class IniEditor
 									HEREDOC;
 							}
 							
-							$c_base64_url = static::base64EncodeUrl($c);
-							$label_base64_url = static::base64EncodeUrl($label);
+							$c_base64url = static::base64EncodeUrl($c);
+							$label_base64url = static::base64EncodeUrl($label);
 							
 							if (
 								is_bool($val[$k]) ||
@@ -1120,13 +1120,13 @@ class IniEditor
 							) {
 								$checked = ($v ? ' checked="checked"' : "");
 								$html .= <<<HEREDOC
-									<input class='form_checkbox' type='hidden' name='ini#$c_base64_url#$label_base64_url#bool[]' />
-									<input class='form_checkbox' type='checkbox' name='ini#$c_base64_url#$label_base64_url#bool[]' value='1'$checked />
+									<input class='form_checkbox' type='hidden' name='ini#$c_base64url#$label_base64url#bool[]' />
+									<input class='form_checkbox' type='checkbox' name='ini#$c_base64url#$label_base64url#bool[]' value='1'$checked />
 									HEREDOC;
 							} else {
-								$k_base64_url = static::base64EncodeUrl($k);
+								$k_base64url = static::base64EncodeUrl($k);
 								$textarea_content = str_replace('\\"', '"', $v);
-								$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64_url#$label_base64_url#text[$k_base64_url]'>" .
+								$html .= "<textarea rows='1' class='form-control' name='ini#$c_base64url#$label_base64url#text[$k_base64url]'>" .
 								           $textarea_content .
 								         "</textarea>";
 							}
@@ -1198,4 +1198,3 @@ class IniEditor
 		echo $this->getForm();
 	}
 }
-?>
